@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'package:browser_adapter/browser_adapter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:video_player/video_player.dart';
 import 'interface.dart';
@@ -12,7 +14,9 @@ import 'video_player_focus.dart';
 class ImageBackdrop extends StatefulWidget {
   final BoxFit boxFit;
   final String? imageUrl;
-  const ImageBackdrop(this.imageUrl, {this.boxFit = BoxFit.cover, Key? key})
+  final String? blurHash;
+  const ImageBackdrop(this.imageUrl,
+      {this.boxFit = BoxFit.cover, this.blurHash, Key? key})
       : super(key: key);
 
   @override
@@ -27,24 +31,28 @@ class _ImageBackdropState extends State<ImageBackdrop> {
   void initState() {
     provider = CachedNetworkImageProvider(widget.imageUrl!);
     coveredImage = Image(
-      image: CachedNetworkImageProvider(widget.imageUrl!),
+      image: CachedNetworkImageProvider(
+        widget.imageUrl!,
+      ),
       fit: BoxFit.cover,
     );
-    filter = ClipRect(
-      child: ImageFiltered(
-        imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-        child: Opacity(
-          opacity: 0.4,
-          child: Transform.scale(
-            scale: 3,
-            child: Image(
-              image: CachedNetworkImageProvider(widget.imageUrl!),
-              fit: BoxFit.cover,
+    filter = widget.blurHash != null
+        ? BlurHash(hash: widget.blurHash!)
+        : ClipRect(
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+              child: Opacity(
+                opacity: 0.4,
+                child: Transform.scale(
+                  scale: 3,
+                  child: Image(
+                    image: CachedNetworkImageProvider(widget.imageUrl!),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    );
+          );
     super.initState();
   }
 
@@ -52,7 +60,27 @@ class _ImageBackdropState extends State<ImageBackdrop> {
   Widget build(BuildContext context) {
     if (widget.imageUrl == null) return const SizedBox.expand();
     if (widget.boxFit == BoxFit.cover) {
-      return Container(color: Colors.black, child: coveredImage);
+      return Container(
+          color: Colors.black,
+          child: CachedNetworkImage(
+            placeholder: widget.blurHash != null
+                ? (_, __) => BlurHash(hash: widget.blurHash!)
+                : null,
+            imageUrl: widget.imageUrl!,
+            fit: BoxFit.cover,
+          ));
+    }
+    if (widget.blurHash != null) {
+      return Container(
+        color: Colors.black,
+        child: Stack(fit: StackFit.expand, children: [
+          filter,
+          Image(
+            image: provider,
+            fit: BoxFit.contain,
+          )
+        ]),
+      );
     }
     if (isSafariBrowser()) {
       return Container(
@@ -103,6 +131,7 @@ class VideoPreview extends StatefulWidget {
   final VideoContentBuilder? contentBuilder;
   final String videoUrl;
   final String? videoImageUrl;
+  final String? blurHash;
   final bool autoPlay;
   final VoidCallback? onClose;
   final DataSourceType dataSourceType;
@@ -119,6 +148,7 @@ class VideoPreview extends StatefulWidget {
     Key? key,
     this.contentBuilder,
     this.videoImageUrl,
+    this.blurHash,
     this.autoPlay = true,
     this.onClose,
     this.boxFit = BoxFit.cover,
@@ -174,8 +204,9 @@ class VideoPreviewState extends State<VideoPreview>
   }
 
   _initVideo() async {
-    await _videoController.setVolume(0);
-    await _videoController.setMuted(true);
+    if (kIsWeb) {
+      await _videoController.setMuted(true);
+    }
     _initializeVideoPlayerFuture = _videoController.initialize();
     await _initializeVideoPlayerFuture;
     _videoController.setLooping(true);
@@ -260,16 +291,29 @@ class VideoPreviewState extends State<VideoPreview>
     );
   }
 
+  Widget _buildBackdrop() {
+    if (widget.blurHash != null) {
+      return FittedBox(
+        child: BlurHash(hash: widget.blurHash!),
+        fit: widget.boxFit,
+      );
+    } else if (widget.videoImageUrl != null) {
+      return ImageBackdrop(
+        widget.videoImageUrl,
+        key: ValueKey(widget.videoImageUrl),
+        boxFit: widget.boxFit,
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
       children: <Widget>[
-        ImageBackdrop(
-          widget.videoImageUrl,
-          key: ValueKey(widget.videoImageUrl),
-          boxFit: widget.boxFit,
-        ),
+        _buildBackdrop(),
         ValueListenableBuilder(
           valueListenable: _videoLoaded,
           builder: (BuildContext context, bool value, Widget? image) {
