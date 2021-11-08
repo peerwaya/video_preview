@@ -37,7 +37,12 @@ class _ImageBackdropState extends State<ImageBackdrop> {
       fit: BoxFit.cover,
     );
     filter = widget.blurHash != null
-        ? BlurHash(hash: widget.blurHash!)
+        ? BlurHash(
+            color: Colors.black,
+            hash: widget.blurHash!,
+            imageFit: BoxFit.cover,
+            duration: Duration.zero,
+          )
         : ClipRect(
             child: ImageFiltered(
               imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
@@ -64,7 +69,12 @@ class _ImageBackdropState extends State<ImageBackdrop> {
           color: Colors.black,
           child: CachedNetworkImage(
             placeholder: widget.blurHash != null
-                ? (_, __) => BlurHash(hash: widget.blurHash!)
+                ? (_, __) => BlurHash(
+                      color: Colors.black,
+                      hash: widget.blurHash!,
+                      imageFit: BoxFit.cover,
+                      duration: Duration.zero,
+                    )
                 : null,
             imageUrl: widget.imageUrl!,
             fit: BoxFit.cover,
@@ -291,29 +301,17 @@ class VideoPreviewState extends State<VideoPreview>
     );
   }
 
-  Widget _buildBackdrop() {
-    if (widget.blurHash != null) {
-      return FittedBox(
-        child: BlurHash(hash: widget.blurHash!),
-        fit: widget.boxFit,
-      );
-    } else if (widget.videoImageUrl != null) {
-      return ImageBackdrop(
-        widget.videoImageUrl,
-        key: ValueKey(widget.videoImageUrl),
-        boxFit: widget.boxFit,
-      );
-    } else {
-      return const SizedBox.shrink();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
       children: <Widget>[
-        _buildBackdrop(),
+        ImageBackdrop(
+          widget.videoImageUrl,
+          key: ValueKey(widget.videoImageUrl),
+          boxFit: widget.boxFit,
+          blurHash: widget.blurHash,
+        ),
         ValueListenableBuilder(
           valueListenable: _videoLoaded,
           builder: (BuildContext context, bool value, Widget? image) {
