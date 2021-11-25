@@ -225,7 +225,9 @@ class VideoPreviewState extends State<VideoPreview>
     }
     _videoLoaded.value = true;
     widget.onPlayerControllerCreated?.call(_videoController);
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _checkIsPlaying() {
