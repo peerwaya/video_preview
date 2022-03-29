@@ -31,7 +31,7 @@ class _VideoPlayerFocusState extends State<VideoPlayerFocus>
   @override
   initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
