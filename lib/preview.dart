@@ -11,7 +11,7 @@ import 'package:video_player/video_player.dart';
 import 'interface.dart';
 import 'video_player_focus.dart';
 
-class ImageBackdrop extends StatefulWidget {
+class ImageBackdrop extends StatelessWidget {
   final BoxFit boxFit;
   final String? imageUrl;
   final String? blurHash;
@@ -20,67 +20,44 @@ class ImageBackdrop extends StatefulWidget {
       : super(key: key);
 
   @override
-  _ImageBackdropState createState() => _ImageBackdropState();
-}
-
-class _ImageBackdropState extends State<ImageBackdrop> {
-  late Widget filter;
-  @override
-  void initState() {
-    filter = widget.blurHash != null
-        ? BlurHash(
-            color: Colors.black,
-            hash: widget.blurHash!,
-            imageFit: BoxFit.cover,
-            duration: Duration.zero,
-          )
-        : ClipRect(
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-              child: Opacity(
-                opacity: 0.4,
-                child: Transform.scale(
-                  scale: 3,
-                  child: Image(
-                    image: CachedNetworkImageProvider(widget.imageUrl!),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-          );
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.imageUrl == null) return const SizedBox.expand();
-    if (widget.boxFit == BoxFit.cover) {
-      return Container(
-          color: Colors.black,
-          child: CachedNetworkImage(
-            placeholder: widget.blurHash != null
-                ? (_, __) => BlurHash(
-                      color: Colors.black,
-                      hash: widget.blurHash!,
-                      imageFit: BoxFit.cover,
-                      duration: Duration.zero,
-                    )
-                : null,
-            imageUrl: widget.imageUrl!,
-            fit: BoxFit.cover,
-          ));
-    }
-    if (widget.blurHash != null) {
+    if (imageUrl == null) return const SizedBox.expand();
+    if (boxFit == BoxFit.cover) {
       return Container(
         color: Colors.black,
-        child: Stack(fit: StackFit.expand, children: [
-          filter,
-          Image(
-            image: CachedNetworkImageProvider(widget.imageUrl!),
-            fit: BoxFit.contain,
-          )
-        ]),
+        child: CachedNetworkImage(
+          placeholder: blurHash != null
+              ? (_, __) => BlurHash(
+                    color: Colors.black,
+                    hash: blurHash!,
+                    imageFit: BoxFit.cover,
+                    duration: Duration.zero,
+                  )
+              : null,
+          imageUrl: imageUrl!,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
+    if (blurHash != null) {
+      return Container(
+        color: Colors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            BlurHash(
+              color: Colors.black,
+              hash: blurHash!,
+              imageFit: BoxFit.cover,
+              duration: Duration.zero,
+            ),
+            Image(
+              image: CachedNetworkImageProvider(imageUrl!),
+              fit: BoxFit.contain,
+            )
+          ],
+        ),
       );
     }
     if (isSafariBrowser()) {
@@ -94,7 +71,7 @@ class _ImageBackdropState extends State<ImageBackdrop> {
               child: Transform.scale(
                 scale: 3,
                 child: Image(
-                  image: CachedNetworkImageProvider(widget.imageUrl!),
+                  image: CachedNetworkImageProvider(imageUrl!),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -103,7 +80,7 @@ class _ImageBackdropState extends State<ImageBackdrop> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                 child: Image(
-                  image: CachedNetworkImageProvider(widget.imageUrl!),
+                  image: CachedNetworkImageProvider(imageUrl!),
                   fit: BoxFit.contain,
                 ),
               ),
@@ -114,13 +91,37 @@ class _ImageBackdropState extends State<ImageBackdrop> {
     }
     return Container(
       color: Colors.black,
-      child: Stack(fit: StackFit.expand, children: [
-        filter,
-        Image(
-          image: CachedNetworkImageProvider(widget.imageUrl!),
-          fit: BoxFit.contain,
-        )
-      ]),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          blurHash != null
+              ? BlurHash(
+                  color: Colors.black,
+                  hash: blurHash!,
+                  imageFit: BoxFit.cover,
+                  duration: Duration.zero,
+                )
+              : ClipRect(
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                    child: Opacity(
+                      opacity: 0.4,
+                      child: Transform.scale(
+                        scale: 3,
+                        child: Image(
+                          image: CachedNetworkImageProvider(imageUrl!),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+          Image(
+            image: CachedNetworkImageProvider(imageUrl!),
+            fit: BoxFit.contain,
+          )
+        ],
+      ),
     );
   }
 }
