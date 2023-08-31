@@ -53,6 +53,7 @@ class VideoOverlayState extends State<VideoOverlay>
   @override
   initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _configureFadeAnimation();
   }
 
@@ -97,7 +98,7 @@ class VideoOverlayState extends State<VideoOverlay>
     _fadeController?.removeStatusListener(_handleFadeStatus);
     _fadeController?.dispose();
     _timer?.cancel();
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -191,7 +192,7 @@ class VideoOverlayState extends State<VideoOverlay>
         ),
       );
     }
-    return FlatButton(
+    return ElevatedButton(
       onPressed: () => showOverlay(true),
       child: widget.contentBuilder(context, _fadeController,
           autoPlay: widget.autoPlay,

@@ -4,21 +4,20 @@ version: 0.0.1
 homepage:
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
-  flutter: ">=1.17.0"
+  sdk: '>=3.0.0 <3.3.0'
 
 publish_to: none
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^5.0.0
-  visibility_detector: ^0.2.2
-  cached_network_image: ^3.1.0
+  provider: ^6.0.2
+  visibility_detector: ^0.4.0+2
+  cached_network_image: ^3.2.3
   browser_adapter:
     git:
       url: https://github.com/KurobiHq/browser_adapter.git
-  pointer_interceptor: ^0.9.0+1
-  flutter_blurhash: ^0.6.0
+  pointer_interceptor: ^0.9.3+6
+  flutter_blurhash: ^0.7.0
   video_player:
     git:
       url: https://github.com/peerwaya/plugins.git
