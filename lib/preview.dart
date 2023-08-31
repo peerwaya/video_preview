@@ -25,17 +25,8 @@ class ImageBackdrop extends StatefulWidget {
 
 class _ImageBackdropState extends State<ImageBackdrop> {
   late Widget filter;
-  late ImageProvider provider;
-  Widget? coveredImage;
   @override
   void initState() {
-    provider = CachedNetworkImageProvider(widget.imageUrl!);
-    coveredImage = Image(
-      image: CachedNetworkImageProvider(
-        widget.imageUrl!,
-      ),
-      fit: BoxFit.cover,
-    );
     filter = widget.blurHash != null
         ? BlurHash(
             color: Colors.black,
@@ -86,7 +77,7 @@ class _ImageBackdropState extends State<ImageBackdrop> {
         child: Stack(fit: StackFit.expand, children: [
           filter,
           Image(
-            image: provider,
+            image: CachedNetworkImageProvider(widget.imageUrl!),
             fit: BoxFit.contain,
           )
         ]),
@@ -112,7 +103,7 @@ class _ImageBackdropState extends State<ImageBackdrop> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                 child: Image(
-                  image: provider,
+                  image: CachedNetworkImageProvider(widget.imageUrl!),
                   fit: BoxFit.contain,
                 ),
               ),
@@ -126,7 +117,7 @@ class _ImageBackdropState extends State<ImageBackdrop> {
       child: Stack(fit: StackFit.expand, children: [
         filter,
         Image(
-          image: provider,
+          image: CachedNetworkImageProvider(widget.imageUrl!),
           fit: BoxFit.contain,
         )
       ]),
