@@ -182,22 +182,23 @@ class VideoPreviewState extends State<VideoPreview>
     super.initState();
     switch (widget.dataSourceType) {
       case DataSourceType.network:
-        _videoController = VideoPlayerController.network(
-          widget.videoUrl,
-          videoPlayerOptions:
-              VideoPlayerOptions(enableObserver: false, cacheEnabled: true),
+        _videoController = VideoPlayerController.networkUrl(
+          Uri.parse(widget.videoUrl),
         );
         break;
       case DataSourceType.file:
         _videoController = VideoPlayerController.file(
           File(widget.videoUrl),
-          videoPlayerOptions: VideoPlayerOptions(enableObserver: false),
         );
         break;
       case DataSourceType.asset:
         _videoController = VideoPlayerController.asset(
           widget.videoUrl,
-          videoPlayerOptions: VideoPlayerOptions(enableObserver: false),
+        );
+
+      case DataSourceType.contentUri:
+        _videoController = VideoPlayerController.contentUri(
+          Uri.parse(widget.videoUrl),
         );
         break;
     }
@@ -207,7 +208,7 @@ class VideoPreviewState extends State<VideoPreview>
 
   _initVideo() async {
     if (kIsWeb) {
-      await _videoController.setMuted(true);
+      await _videoController.setVolume(0.0);
     }
     _initializeVideoPlayerFuture = _videoController.initialize();
     await _initializeVideoPlayerFuture;
