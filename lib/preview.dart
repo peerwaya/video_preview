@@ -182,8 +182,8 @@ class VideoPreviewState extends State<VideoPreview>
     super.initState();
     switch (widget.dataSourceType) {
       case DataSourceType.network:
-        _videoController = VideoPlayerController.networkUrl(
-          Uri.parse(widget.videoUrl),
+        _videoController = VideoPlayerController.network(
+          widget.videoUrl,
         );
         break;
       case DataSourceType.file:
@@ -194,11 +194,6 @@ class VideoPreviewState extends State<VideoPreview>
       case DataSourceType.asset:
         _videoController = VideoPlayerController.asset(
           widget.videoUrl,
-        );
-
-      case DataSourceType.contentUri:
-        _videoController = VideoPlayerController.contentUri(
-          Uri.parse(widget.videoUrl),
         );
         break;
     }
