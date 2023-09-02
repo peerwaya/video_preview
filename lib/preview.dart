@@ -209,7 +209,7 @@ class VideoPreviewState extends State<VideoPreview>
 
   _initVideo() async {
     if (kIsWeb) {
-      await _videoController.setVolume(0.0);
+      await _videoController.setMuted(true);
     }
     _initializeVideoPlayerFuture = _videoController.initialize();
     await _initializeVideoPlayerFuture;
