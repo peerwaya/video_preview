@@ -208,11 +208,11 @@ class VideoPreviewState extends State<VideoPreview>
   }
 
   _initVideo() async {
-    if (kIsWeb) {
-      await _videoController.setVolume(0.0);
-    }
     _initializeVideoPlayerFuture = _videoController.initialize();
     await _initializeVideoPlayerFuture;
+    if (kIsWeb && widget.autoPlay) {
+      await _videoController.setVolume(0.0);
+    }
     _videoController.setLooping(true);
     if (widget.autoPlay) {
       _videoController.play();
