@@ -143,22 +143,23 @@ class VideoPreview extends StatefulWidget {
   final String? backgroundImageUrl;
   final OnVideoPlayerControllerCreated? onPlayerControllerCreated;
   final bool observeRoute;
-  const VideoPreview(
-    this.videoUrl, {
-    this.width,
-    this.height,
-    Key? key,
-    this.contentBuilder,
-    this.videoImageUrl,
-    this.blurHash,
-    this.autoPlay = true,
-    this.onClose,
-    this.boxFit = BoxFit.cover,
-    this.dataSourceType = DataSourceType.network,
-    this.backgroundImageUrl,
-    this.onPlayerControllerCreated,
-    this.observeRoute = true,
-  }) : super(key: key);
+  final BorderRadius? radius;
+  const VideoPreview(this.videoUrl,
+      {this.width,
+      this.height,
+      Key? key,
+      this.contentBuilder,
+      this.videoImageUrl,
+      this.blurHash,
+      this.autoPlay = true,
+      this.onClose,
+      this.boxFit = BoxFit.cover,
+      this.dataSourceType = DataSourceType.network,
+      this.backgroundImageUrl,
+      this.onPlayerControllerCreated,
+      this.observeRoute = true,
+      this.radius})
+      : super(key: key);
 
   @override
   VideoPreviewState createState() {
@@ -265,7 +266,16 @@ class VideoPreviewState extends State<VideoPreview>
           height: height,
           child: VideoPlayerFocus(
             _videoController,
-            VideoPlayer(_videoController),
+            widget.radius != null
+                ? ClipRRect(
+                    borderRadius: widget.radius!,
+                    child: VideoPlayer(
+                      _videoController,
+                    ),
+                  )
+                : VideoPlayer(
+                    _videoController,
+                  ),
             key: ValueKey(widget.videoUrl),
           ),
         ),
@@ -286,9 +296,16 @@ class VideoPreviewState extends State<VideoPreview>
           aspectRatio: _videoController.value.aspectRatio,
           child: VideoPlayerFocus(
             _videoController,
-            VideoPlayer(
-              _videoController,
-            ),
+            widget.radius != null
+                ? ClipRRect(
+                    borderRadius: widget.radius!,
+                    child: VideoPlayer(
+                      _videoController,
+                    ),
+                  )
+                : VideoPlayer(
+                    _videoController,
+                  ),
             key: ValueKey(widget.videoUrl),
           ),
         ),
