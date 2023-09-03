@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:video_preview/dots_loader.dart';
-import 'package:video_preview/icon_shadow.dart';
 
 const _shadow = <Shadow>[
   Shadow(

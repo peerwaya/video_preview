@@ -196,7 +196,7 @@ class VideoPreviewState extends State<VideoPreview>
         _videoController = VideoPlayerController.asset(
           widget.videoUrl,
         );
-
+        break;
       case DataSourceType.contentUri:
         _videoController = VideoPlayerController.contentUri(
           Uri.parse(widget.videoUrl),
