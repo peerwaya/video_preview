@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:video_preview/dots_loader.dart';
 import 'package:video_preview/icon_shadow.dart';
@@ -61,11 +62,19 @@ class VideoControlstate extends State<VideoControls>
   }
 
   Widget _buildPlayButton() {
-    return const IconS(
-      Icons.play_arrow_outlined,
-      color: Colors.white54,
-      shadows: _shadow,
-      size: 72.0,
+    return Container(
+      width: 72.0,
+      height: 72.0,
+      decoration:
+          const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+      child: const Center(
+        child: Icon(
+          MdiIcons.play,
+          color: Colors.white,
+          shadows: _shadow,
+          size: 48.0,
+        ),
+      ),
     );
   }
 

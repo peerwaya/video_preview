@@ -19,6 +19,9 @@ dependencies:
   pointer_interceptor: ^0.9.3+6
   flutter_blurhash: ^0.7.0
   video_player: ^2.7.1
+  material_design_icons_flutter:
+    git:
+      url: https://github.com/peerwaya/material_design_icons_flutter.git
   # video_player:
   #   git:
   #     url: https://github.com/peerwaya/plugins.git
