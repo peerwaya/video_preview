@@ -21,23 +21,30 @@ class ImageBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (imageUrl == null) return const SizedBox.expand();
+    if (imageUrl == null && blurHash == null) return const SizedBox.expand();
     if (boxFit == BoxFit.cover) {
-      return Container(
-        color: Colors.black,
-        child: CachedNetworkImage(
-          placeholder: blurHash != null
-              ? (_, __) => BlurHash(
-                    color: Colors.black,
-                    hash: blurHash!,
-                    imageFit: BoxFit.cover,
-                    duration: Duration.zero,
-                  )
-              : null,
-          imageUrl: imageUrl!,
-          fit: BoxFit.cover,
-        ),
-      );
+      return imageUrl != null
+          ? Container(
+              color: Colors.black,
+              child: CachedNetworkImage(
+                placeholder: blurHash != null
+                    ? (_, __) => BlurHash(
+                          color: Colors.black,
+                          hash: blurHash!,
+                          imageFit: BoxFit.cover,
+                          duration: Duration.zero,
+                        )
+                    : null,
+                imageUrl: imageUrl!,
+                fit: BoxFit.cover,
+              ),
+            )
+          : BlurHash(
+              color: Colors.black,
+              hash: blurHash!,
+              imageFit: BoxFit.cover,
+              duration: Duration.zero,
+            );
     }
 
     if (blurHash != null) {
@@ -52,15 +59,16 @@ class ImageBackdrop extends StatelessWidget {
               imageFit: BoxFit.cover,
               duration: Duration.zero,
             ),
-            Image(
-              image: CachedNetworkImageProvider(imageUrl!),
-              fit: BoxFit.contain,
-            )
+            if (imageUrl != null)
+              Image(
+                image: CachedNetworkImageProvider(imageUrl!),
+                fit: BoxFit.contain,
+              )
           ],
         ),
       );
     }
-    if (isSafariBrowser()) {
+    if (imageUrl != null && isSafariBrowser()) {
       return Container(
         color: Colors.black,
         child: Stack(
@@ -101,25 +109,28 @@ class ImageBackdrop extends StatelessWidget {
                   imageFit: BoxFit.cover,
                   duration: Duration.zero,
                 )
-              : ClipRect(
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: Transform.scale(
-                        scale: 3,
-                        child: Image(
-                          image: CachedNetworkImageProvider(imageUrl!),
-                          fit: BoxFit.cover,
+              : imageUrl != null
+                  ? ClipRect(
+                      child: ImageFiltered(
+                        imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                        child: Opacity(
+                          opacity: 0.4,
+                          child: Transform.scale(
+                            scale: 3,
+                            child: Image(
+                              image: CachedNetworkImageProvider(imageUrl!),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-          Image(
-            image: CachedNetworkImageProvider(imageUrl!),
-            fit: BoxFit.contain,
-          )
+                    )
+                  : const SizedBox.shrink(),
+          if (imageUrl != null)
+            Image(
+              image: CachedNetworkImageProvider(imageUrl!),
+              fit: BoxFit.contain,
+            )
         ],
       ),
     );
