@@ -21,23 +21,19 @@ class ImageBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (imageUrl == null && blurHash == null) return const SizedBox.expand();
     if (boxFit == BoxFit.cover) {
       return imageUrl != null
-          ? Container(
-              color: Colors.black,
-              child: CachedNetworkImage(
-                placeholder: blurHash != null
-                    ? (_, __) => BlurHash(
-                          color: Colors.black,
-                          hash: blurHash!,
-                          imageFit: BoxFit.cover,
-                          duration: Duration.zero,
-                        )
-                    : null,
-                imageUrl: imageUrl!,
-                fit: BoxFit.cover,
-              ),
+          ? CachedNetworkImage(
+              placeholder: blurHash != null
+                  ? (_, __) => BlurHash(
+                        color: Colors.black,
+                        hash: blurHash!,
+                        imageFit: BoxFit.cover,
+                        duration: Duration.zero,
+                      )
+                  : null,
+              imageUrl: imageUrl!,
+              fit: BoxFit.cover,
             )
           : BlurHash(
               color: Colors.black,
@@ -48,91 +44,82 @@ class ImageBackdrop extends StatelessWidget {
     }
 
     if (blurHash != null) {
-      return Container(
-        color: Colors.black,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            BlurHash(
-              color: Colors.black,
-              hash: blurHash!,
-              imageFit: BoxFit.cover,
-              duration: Duration.zero,
-            ),
-            if (imageUrl != null)
-              Image(
-                image: CachedNetworkImageProvider(imageUrl!),
-                fit: BoxFit.contain,
-              )
-          ],
-        ),
-      );
-    }
-    if (imageUrl != null && isSafariBrowser()) {
-      return Container(
-        color: Colors.black,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Opacity(
-              opacity: 0.4,
-              child: Transform.scale(
-                scale: 3,
-                child: Image(
-                  image: CachedNetworkImageProvider(imageUrl!),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                child: Image(
-                  image: CachedNetworkImageProvider(imageUrl!),
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    return Container(
-      color: Colors.black,
-      child: Stack(
+      return Stack(
         fit: StackFit.expand,
         children: [
-          blurHash != null
-              ? BlurHash(
-                  color: Colors.black,
-                  hash: blurHash!,
-                  imageFit: BoxFit.cover,
-                  duration: Duration.zero,
-                )
-              : imageUrl != null
-                  ? ClipRect(
-                      child: ImageFiltered(
-                        imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                        child: Opacity(
-                          opacity: 0.4,
-                          child: Transform.scale(
-                            scale: 3,
-                            child: Image(
-                              image: CachedNetworkImageProvider(imageUrl!),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
+          BlurHash(
+            color: Colors.black,
+            hash: blurHash!,
+            imageFit: BoxFit.cover,
+            duration: Duration.zero,
+          ),
           if (imageUrl != null)
             Image(
               image: CachedNetworkImageProvider(imageUrl!),
               fit: BoxFit.contain,
             )
         ],
-      ),
+      );
+    }
+    if (imageUrl != null && isSafariBrowser()) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Opacity(
+            opacity: 0.4,
+            child: Transform.scale(
+              scale: 3,
+              child: Image(
+                image: CachedNetworkImageProvider(imageUrl!),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+              child: Image(
+                image: CachedNetworkImageProvider(imageUrl!),
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        blurHash != null
+            ? BlurHash(
+                color: Colors.black,
+                hash: blurHash!,
+                imageFit: BoxFit.cover,
+                duration: Duration.zero,
+              )
+            : imageUrl != null
+                ? ClipRect(
+                    child: ImageFiltered(
+                      imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: Transform.scale(
+                          scale: 3,
+                          child: Image(
+                            image: CachedNetworkImageProvider(imageUrl!),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+        if (imageUrl != null)
+          Image(
+            image: CachedNetworkImageProvider(imageUrl!),
+            fit: BoxFit.contain,
+          )
+      ],
     );
   }
 }
