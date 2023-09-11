@@ -15,8 +15,12 @@ class ImageBackdrop extends StatelessWidget {
   final BoxFit boxFit;
   final String? imageUrl;
   final String? blurHash;
+  final Color blurColor;
   const ImageBackdrop(this.imageUrl,
-      {this.boxFit = BoxFit.cover, this.blurHash, Key? key})
+      {this.boxFit = BoxFit.cover,
+      this.blurHash,
+      this.blurColor = Colors.black,
+      Key? key})
       : super(key: key);
 
   @override
@@ -26,7 +30,7 @@ class ImageBackdrop extends StatelessWidget {
           ? CachedNetworkImage(
               placeholder: blurHash != null
                   ? (_, __) => BlurHash(
-                        color: Colors.black,
+                        color: blurColor,
                         hash: blurHash!,
                         imageFit: BoxFit.cover,
                         duration: Duration.zero,
@@ -36,7 +40,7 @@ class ImageBackdrop extends StatelessWidget {
               fit: BoxFit.cover,
             )
           : BlurHash(
-              color: Colors.black,
+              color: blurColor,
               hash: blurHash!,
               imageFit: BoxFit.cover,
               duration: Duration.zero,
@@ -48,7 +52,7 @@ class ImageBackdrop extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           BlurHash(
-            color: Colors.black,
+            color: blurColor,
             hash: blurHash!,
             imageFit: BoxFit.cover,
             duration: Duration.zero,
@@ -92,7 +96,7 @@ class ImageBackdrop extends StatelessWidget {
       children: [
         blurHash != null
             ? BlurHash(
-                color: Colors.black,
+                color: blurColor,
                 hash: blurHash!,
                 imageFit: BoxFit.cover,
                 duration: Duration.zero,
@@ -142,6 +146,8 @@ class VideoPreview extends StatefulWidget {
   final OnVideoPlayerControllerCreated? onPlayerControllerCreated;
   final bool observeRoute;
   final BorderRadius? radius;
+  final Color blurColor;
+  final bool backdropEnabled;
   const VideoPreview(this.videoUrl,
       {this.width,
       this.height,
@@ -156,6 +162,8 @@ class VideoPreview extends StatefulWidget {
       this.backgroundImageUrl,
       this.onPlayerControllerCreated,
       this.observeRoute = true,
+      this.blurColor = Colors.black,
+      this.backdropEnabled = true,
       this.radius})
       : super(key: key);
 
@@ -316,12 +324,32 @@ class VideoPreviewState extends State<VideoPreview>
     return Stack(
       fit: StackFit.expand,
       children: <Widget>[
-        ImageBackdrop(
-          widget.videoImageUrl,
-          key: ValueKey(widget.videoImageUrl),
-          boxFit: widget.boxFit,
-          blurHash: widget.blurHash,
-        ),
+        widget.backdropEnabled
+            ? ImageBackdrop(
+                widget.videoImageUrl,
+                key: ValueKey(widget.videoImageUrl),
+                boxFit: widget.boxFit,
+                blurHash: widget.blurHash,
+                blurColor: widget.blurColor,
+              )
+            : widget.videoImageUrl != null
+                ? widget.radius != null
+                    ? Center(
+                        child: ClipRRect(
+                          borderRadius: widget.radius!,
+                          child: Image(
+                            image: CachedNetworkImageProvider(
+                                widget.videoImageUrl!),
+                            fit: widget.boxFit,
+                          ),
+                        ),
+                      )
+                    : Image(
+                        image:
+                            CachedNetworkImageProvider(widget.videoImageUrl!),
+                        fit: widget.boxFit,
+                      )
+                : const SizedBox.shrink(),
         ValueListenableBuilder(
           valueListenable: _videoLoaded,
           builder: (BuildContext context, bool value, Widget? image) {
