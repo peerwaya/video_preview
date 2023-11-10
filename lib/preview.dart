@@ -57,17 +57,23 @@ class ImageBackdrop extends StatelessWidget {
       return Stack(
         fit: StackFit.expand,
         children: [
-          kIsWeb
-              ? BlurHash(
-                  color: blurColor,
-                  hash: blurHash!,
-                  imageFit: BoxFit.cover,
+          imageUrl != null
+              ? ClipRect(
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                    child: Opacity(
+                      opacity: 0.4,
+                      child: Transform.scale(
+                        scale: 3,
+                        child: Image(
+                          image: CachedNetworkImageProvider(imageUrl!),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
                 )
-              : BlurhashFfi(
-                  color: blurColor,
-                  hash: blurHash!,
-                  imageFit: BoxFit.cover,
-                ),
+              : const SizedBox.shrink(),
           if (imageUrl != null)
             Image(
               image: CachedNetworkImageProvider(imageUrl!),
@@ -105,35 +111,36 @@ class ImageBackdrop extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        blurHash != null
-            ? kIsWeb
-                ? BlurHash(
-                    color: blurColor,
-                    hash: blurHash!,
-                    imageFit: BoxFit.cover,
-                  )
-                : BlurhashFfi(
-                    color: blurColor,
-                    hash: blurHash!,
-                    imageFit: BoxFit.cover,
-                  )
-            : imageUrl != null
-                ? ClipRect(
-                    child: ImageFiltered(
-                      imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: Transform.scale(
-                          scale: 3,
-                          child: Image(
-                            image: CachedNetworkImageProvider(imageUrl!),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+        // blurHash != null
+        //     ? kIsWeb
+        //         ? BlurHash(
+        //             color: blurColor,
+        //             hash: blurHash!,
+        //             imageFit: BoxFit.cover,
+        //           )
+        //         : BlurhashFfi(
+        //             color: blurColor,
+        //             hash: blurHash!,
+        //             imageFit: BoxFit.cover,
+        //           )
+        //     :
+        imageUrl != null
+            ? ClipRect(
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                  child: Opacity(
+                    opacity: 0.4,
+                    child: Transform.scale(
+                      scale: 3,
+                      child: Image(
+                        image: CachedNetworkImageProvider(imageUrl!),
+                        fit: BoxFit.cover,
                       ),
                     ),
-                  )
-                : const SizedBox.shrink(),
+                  ),
+                ),
+              )
+            : const SizedBox.shrink(),
         if (imageUrl != null)
           Image(
             image: CachedNetworkImageProvider(imageUrl!),
