@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
-import 'package:browser_adapter/browser_adapter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:blurhash_ffi/blurhash_ffi.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
@@ -27,103 +25,66 @@ class ImageBackdrop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (boxFit == BoxFit.cover) {
-      return imageUrl != null
-          ? CachedNetworkImage(
-              placeholder: blurHash != null
-                  ? (_, __) => BlurhashFfi(
-                        color: blurColor,
-                        hash: blurHash!,
-                        imageFit: BoxFit.cover,
-                        duration: Duration.zero,
-                      )
-                  : null,
-              imageUrl: imageUrl!,
-              fit: BoxFit.cover,
-            )
-          : kIsWeb
-              ? BlurHash(
-                  color: blurColor,
-                  hash: blurHash!,
-                  imageFit: BoxFit.cover,
-                )
-              : BlurhashFfi(
-                  color: blurColor,
-                  hash: blurHash!,
-                  imageFit: BoxFit.cover,
-                );
+      return BlurHash(
+        color: blurColor,
+        hash: blurHash!,
+        imageFit: BoxFit.cover,
+        image: imageUrl,
+      );
     }
 
-    if (blurHash != null) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          imageUrl != null
-              ? ClipRect(
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: Transform.scale(
-                        scale: 3,
-                        child: Image(
-                          image: CachedNetworkImageProvider(imageUrl!),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(),
-          if (imageUrl != null)
-            Image(
-              image: CachedNetworkImageProvider(imageUrl!),
-              fit: BoxFit.contain,
-            )
-        ],
-      );
-    }
-    if (imageUrl != null && isSafariBrowser()) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          Opacity(
-            opacity: 0.4,
-            child: Transform.scale(
-              scale: 3,
-              child: Image(
-                image: CachedNetworkImageProvider(imageUrl!),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-              child: Image(
-                image: CachedNetworkImageProvider(imageUrl!),
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-        ],
-      );
-    }
+    // if (blurHash != null) {
+    //   return Stack(
+    //     fit: StackFit.expand,
+    //     children: [
+    //       kIsWeb
+    //           ? BlurHash(
+    //               color: blurColor,
+    //               hash: blurHash!,
+    //               imageFit: BoxFit.cover,
+    //             )
+    //           : BlurhashFfi(
+    //               color: blurColor,
+    //               hash: blurHash!,
+    //               imageFit: BoxFit.cover,
+    //             ),
+    //       if (imageUrl != null)
+    //         Image(
+    //           image: CachedNetworkImageProvider(imageUrl!),
+    //           fit: BoxFit.contain,
+    //         )
+    //     ],
+    //   );
+    // }
+    // if (imageUrl != null && isSafariBrowser()) {
+    //   return Stack(
+    //     fit: StackFit.expand,
+    //     children: [
+    //       Opacity(
+    //         opacity: 0.4,
+    //         child: Transform.scale(
+    //           scale: 3,
+    //           child: Image(
+    //             image: CachedNetworkImageProvider(imageUrl!),
+    //             fit: BoxFit.cover,
+    //           ),
+    //         ),
+    //       ),
+    //       ClipRect(
+    //         child: BackdropFilter(
+    //           filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+    //           child: Image(
+    //             image: CachedNetworkImageProvider(imageUrl!),
+    //             fit: BoxFit.contain,
+    //           ),
+    //         ),
+    //       ),
+    //     ],
+    //   );
+    // }
     return Stack(
       fit: StackFit.expand,
       children: [
-        // blurHash != null
-        //     ? kIsWeb
-        //         ? BlurHash(
-        //             color: blurColor,
-        //             hash: blurHash!,
-        //             imageFit: BoxFit.cover,
-        //           )
-        //         : BlurhashFfi(
-        //             color: blurColor,
-        //             hash: blurHash!,
-        //             imageFit: BoxFit.cover,
-        //           )
-        //     :
         imageUrl != null
             ? ClipRect(
                 child: ImageFiltered(

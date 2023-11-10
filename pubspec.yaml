@@ -18,7 +18,6 @@ dependencies:
       url: https://github.com/KurobiHq/browser_adapter.git
   pointer_interceptor: ^0.9.3+6
   flutter_blurhash: ^0.7.0
-  blurhash_ffi: ^1.2.0
   video_player: ^2.7.1
   material_design_icons_flutter:
     git:
