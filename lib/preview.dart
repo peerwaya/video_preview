@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:blurhash_ffi/blurhash_ffi.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:video_player/video_player.dart';
@@ -46,34 +45,36 @@ class ImageBackdrop extends StatelessWidget {
                   color: blurColor,
                   hash: blurHash!,
                   imageFit: BoxFit.cover,
-                  //duration: Duration.zero,
-                  image: imageUrl,
                 )
               : BlurhashFfi(
                   color: blurColor,
                   hash: blurHash!,
                   imageFit: BoxFit.cover,
-                  //duration: Duration.zero,
-                  image: imageUrl,
                 );
     }
 
     if (blurHash != null) {
-      return kIsWeb
-          ? BlurHash(
-              color: blurColor,
-              hash: blurHash!,
-              imageFit: BoxFit.cover,
-              //duration: Duration.zero,
-              image: imageUrl,
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          kIsWeb
+              ? BlurHash(
+                  color: blurColor,
+                  hash: blurHash!,
+                  imageFit: BoxFit.cover,
+                )
+              : BlurhashFfi(
+                  color: blurColor,
+                  hash: blurHash!,
+                  imageFit: BoxFit.cover,
+                ),
+          if (imageUrl != null)
+            Image(
+              image: CachedNetworkImageProvider(imageUrl!),
+              fit: BoxFit.contain,
             )
-          : BlurhashFfi(
-              color: blurColor,
-              hash: blurHash!,
-              imageFit: BoxFit.cover,
-              //duration: Duration.zero,
-              image: imageUrl,
-            );
+        ],
+      );
     }
     if (imageUrl != null && isSafariBrowser()) {
       return Stack(
@@ -101,39 +102,45 @@ class ImageBackdrop extends StatelessWidget {
         ],
       );
     }
-    return blurHash != null
-        ? kIsWeb
-            ? BlurHash(
-                color: blurColor,
-                hash: blurHash!,
-                imageFit: BoxFit.cover,
-                duration: Duration.zero,
-                image: imageUrl,
-              )
-            : BlurhashFfi(
-                color: blurColor,
-                hash: blurHash!,
-                imageFit: BoxFit.cover,
-                duration: Duration.zero,
-                image: imageUrl,
-              )
-        : imageUrl != null
-            ? ClipRect(
-                child: ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                  child: Opacity(
-                    opacity: 0.4,
-                    child: Transform.scale(
-                      scale: 3,
-                      child: Image(
-                        image: CachedNetworkImageProvider(imageUrl!),
-                        fit: BoxFit.cover,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        blurHash != null
+            ? kIsWeb
+                ? BlurHash(
+                    color: blurColor,
+                    hash: blurHash!,
+                    imageFit: BoxFit.cover,
+                  )
+                : BlurhashFfi(
+                    color: blurColor,
+                    hash: blurHash!,
+                    imageFit: BoxFit.cover,
+                  )
+            : imageUrl != null
+                ? ClipRect(
+                    child: ImageFiltered(
+                      imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: Transform.scale(
+                          scale: 3,
+                          child: Image(
+                            image: CachedNetworkImageProvider(imageUrl!),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              )
-            : const SizedBox.shrink();
+                  )
+                : const SizedBox.shrink(),
+        if (imageUrl != null)
+          Image(
+            image: CachedNetworkImageProvider(imageUrl!),
+            fit: BoxFit.contain,
+          )
+      ],
+    );
   }
 }
 
