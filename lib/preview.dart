@@ -4,8 +4,8 @@ import 'dart:ui';
 import 'package:browser_adapter/browser_adapter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:blurhash_ffi/blurhash_ffi.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:video_player/video_player.dart';
 import 'interface.dart';
@@ -29,7 +29,7 @@ class ImageBackdrop extends StatelessWidget {
       return imageUrl != null
           ? CachedNetworkImage(
               placeholder: blurHash != null
-                  ? (_, __) => BlurHash(
+                  ? (_, __) => BlurhashFfi(
                         color: blurColor,
                         hash: blurHash!,
                         imageFit: BoxFit.cover,
@@ -39,7 +39,7 @@ class ImageBackdrop extends StatelessWidget {
               imageUrl: imageUrl!,
               fit: BoxFit.cover,
             )
-          : BlurHash(
+          : BlurhashFfi(
               color: blurColor,
               hash: blurHash!,
               imageFit: BoxFit.cover,
@@ -51,7 +51,7 @@ class ImageBackdrop extends StatelessWidget {
       return Stack(
         fit: StackFit.expand,
         children: [
-          BlurHash(
+          BlurhashFfi(
             color: blurColor,
             hash: blurHash!,
             imageFit: BoxFit.cover,
@@ -95,7 +95,7 @@ class ImageBackdrop extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         blurHash != null
-            ? BlurHash(
+            ? BlurhashFfi(
                 color: blurColor,
                 hash: blurHash!,
                 imageFit: BoxFit.cover,
