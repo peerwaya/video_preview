@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
+//import 'package:browser_adapter/browser_adapter.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:video_player/video_player.dart';
 import 'interface.dart';
 import 'video_player_focus.dart';
+
+const _kDuration = Duration(milliseconds: 400);
 
 class ImageBackdrop extends StatelessWidget {
   final BoxFit boxFit;
@@ -29,34 +32,30 @@ class ImageBackdrop extends StatelessWidget {
         color: blurColor,
         hash: blurHash!,
         imageFit: BoxFit.cover,
-        image: imageUrl,
+        duration: _kDuration,
       );
     }
 
-    // if (blurHash != null) {
-    //   return Stack(
-    //     fit: StackFit.expand,
-    //     children: [
-    //       kIsWeb
-    //           ? BlurHash(
-    //               color: blurColor,
-    //               hash: blurHash!,
-    //               imageFit: BoxFit.cover,
-    //             )
-    //           : BlurhashFfi(
-    //               color: blurColor,
-    //               hash: blurHash!,
-    //               imageFit: BoxFit.cover,
-    //             ),
-    //       if (imageUrl != null)
-    //         Image(
-    //           image: CachedNetworkImageProvider(imageUrl!),
-    //           fit: BoxFit.contain,
-    //         )
-    //     ],
-    //   );
-    // }
-    // if (imageUrl != null && isSafariBrowser()) {
+    if (blurHash != null) {
+      return Stack(
+        fit: StackFit.expand,
+        alignment: Alignment.center,
+        children: [
+          BlurHash(
+            color: blurColor,
+            hash: blurHash!,
+            imageFit: BoxFit.cover,
+            duration: _kDuration,
+          ),
+          if (imageUrl != null)
+            ExtendedImage.network(
+              imageUrl!,
+              fit: BoxFit.contain,
+            ),
+        ],
+      );
+    }
+    // if (imageUrl != null && isSafariBrowser() ) {
     //   return Stack(
     //     fit: StackFit.expand,
     //     children: [
@@ -65,7 +64,7 @@ class ImageBackdrop extends StatelessWidget {
     //         child: Transform.scale(
     //           scale: 3,
     //           child: Image(
-    //             image: CachedNetworkImageProvider(imageUrl!),
+    //             image: ExtendedNetworkImageProvider(imageUrl!),
     //             fit: BoxFit.cover,
     //           ),
     //         ),
@@ -74,7 +73,7 @@ class ImageBackdrop extends StatelessWidget {
     //         child: BackdropFilter(
     //           filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
     //           child: Image(
-    //             image: CachedNetworkImageProvider(imageUrl!),
+    //             image: ExtendedNetworkImageProvider(imageUrl!),
     //             fit: BoxFit.contain,
     //           ),
     //         ),
@@ -85,26 +84,33 @@ class ImageBackdrop extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        imageUrl != null
-            ? ClipRect(
-                child: ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                  child: Opacity(
-                    opacity: 0.4,
-                    child: Transform.scale(
-                      scale: 3,
-                      child: Image(
-                        image: CachedNetworkImageProvider(imageUrl!),
-                        fit: BoxFit.cover,
+        blurHash != null
+            ? BlurHash(
+                color: blurColor,
+                hash: blurHash!,
+                imageFit: BoxFit.cover,
+                duration: _kDuration,
+              )
+            : imageUrl != null
+                ? ClipRect(
+                    child: ImageFiltered(
+                      imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: Transform.scale(
+                          scale: 3,
+                          child: Image(
+                            image: ExtendedNetworkImageProvider(imageUrl!),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              )
-            : const SizedBox.shrink(),
+                  )
+                : const SizedBox.shrink(),
         if (imageUrl != null)
           Image(
-            image: CachedNetworkImageProvider(imageUrl!),
+            image: ExtendedNetworkImageProvider(imageUrl!),
             fit: BoxFit.contain,
           )
       ],
@@ -322,7 +328,7 @@ class VideoPreviewState extends State<VideoPreview>
                         child: ClipRRect(
                           borderRadius: widget.radius!,
                           child: Image(
-                            image: CachedNetworkImageProvider(
+                            image: ExtendedNetworkImageProvider(
                                 widget.videoImageUrl!),
                             fit: widget.boxFit,
                           ),
@@ -330,7 +336,7 @@ class VideoPreviewState extends State<VideoPreview>
                       )
                     : Image(
                         image:
-                            CachedNetworkImageProvider(widget.videoImageUrl!),
+                            ExtendedNetworkImageProvider(widget.videoImageUrl!),
                         fit: widget.boxFit,
                       )
                 : const SizedBox.shrink(),
