@@ -11,7 +11,7 @@ import 'package:video_player/video_player.dart';
 import 'interface.dart';
 import 'video_player_focus.dart';
 
-const _kDuration = Duration(milliseconds: 500);
+const _kDuration = Duration(milliseconds: 600);
 
 class ImageBackdrop extends StatelessWidget {
   final BoxFit boxFit;
