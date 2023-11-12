@@ -348,13 +348,15 @@ class VideoPreviewState extends State<VideoPreview>
         ),
         PointerInterceptor(
           child: SizedBox.expand(
-            child: widget.contentBuilder!(context,
-                play: _playVideo,
-                pause: _pauseVideo,
-                isPlaying: _isPlaying,
-                isBuffering: _isBuffering,
-                autoPlay: widget.autoPlay,
-                videoInitialized: _initializeVideoPlayerFuture),
+            child: widget.contentBuilder != null
+                ? widget.contentBuilder!(context,
+                    play: _playVideo,
+                    pause: _pauseVideo,
+                    isPlaying: _isPlaying,
+                    isBuffering: _isBuffering,
+                    autoPlay: widget.autoPlay,
+                    videoInitialized: _initializeVideoPlayerFuture)
+                : null,
           ),
         ),
       ],
