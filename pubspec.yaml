@@ -12,14 +12,14 @@ dependencies:
     sdk: flutter
   provider: ^6.0.2
   visibility_detector: ^0.4.0+2
-  extended_image: ^8.1.1
+  cached_network_image: ^3.3.0
+  blurhash:
+    git:
+      url: https://github.com/peerwaya/blurhash.git
   browser_adapter:
     git:
       url: https://github.com/KurobiHq/browser_adapter.git
   pointer_interceptor: ^0.9.3+6
-  flutter_blurhash:
-    git:
-      url: https://github.com/peerwaya/flutter_blurhash
   video_player: ^2.7.1
 
   material_design_icons_flutter:

@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
-//import 'package:browser_adapter/browser_adapter.dart';
-import 'package:extended_image/extended_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:blurhash/blurhash.dart';
+import 'package:flutter/services.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:video_player/video_player.dart';
 import 'interface.dart';
@@ -13,108 +12,84 @@ import 'video_player_focus.dart';
 
 const _kDuration = Duration(milliseconds: 600);
 
-class ImageBackdrop extends StatelessWidget {
+class ImageBackdrop extends StatefulWidget {
   final BoxFit boxFit;
   final String? imageUrl;
-  final String? blurHash;
+  final String blurHash;
   final Color blurColor;
+
   const ImageBackdrop(this.imageUrl,
       {this.boxFit = BoxFit.cover,
-      this.blurHash,
+      required this.blurHash,
       this.blurColor = Colors.black,
       Key? key})
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    if (boxFit == BoxFit.cover) {
-      return BlurHash(
-        color: blurColor,
-        hash: blurHash!,
-        imageFit: BoxFit.cover,
-        duration: _kDuration,
-      );
-    }
+  State<ImageBackdrop> createState() => _ImageBackdropState();
+}
 
-    if (blurHash != null) {
-      return Stack(
-        fit: StackFit.expand,
-        alignment: Alignment.center,
-        children: [
-          BlurHash(
-            color: blurColor,
-            hash: blurHash!,
-            imageFit: BoxFit.cover,
-            duration: _kDuration,
-          ),
-          if (imageUrl != null)
-            ExtendedImage.network(
-              imageUrl!,
-              fit: BoxFit.contain,
-            ),
-        ],
-      );
+class _ImageBackdropState extends State<ImageBackdrop> {
+  Uint8List? _imageDataBytes;
+  @override
+  void initState() {
+    super.initState();
+    blurHashDecode();
+  }
+
+  Future blurHashDecode() async {
+    Uint8List? imageDataBytes;
+    try {
+      imageDataBytes = await BlurHash.decode(widget.blurHash, 32, 32);
+    } on PlatformException catch (e) {
+      throw Exception(e.message);
     }
-    // if (imageUrl != null && isSafariBrowser() ) {
-    //   return Stack(
-    //     fit: StackFit.expand,
-    //     children: [
-    //       Opacity(
-    //         opacity: 0.4,
-    //         child: Transform.scale(
-    //           scale: 3,
-    //           child: Image(
-    //             image: ExtendedNetworkImageProvider(imageUrl!),
-    //             fit: BoxFit.cover,
-    //           ),
-    //         ),
-    //       ),
-    //       ClipRect(
-    //         child: BackdropFilter(
-    //           filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-    //           child: Image(
-    //             image: ExtendedNetworkImageProvider(imageUrl!),
-    //             fit: BoxFit.contain,
-    //           ),
-    //         ),
-    //       ),
-    //     ],
-    //   );
-    // }
+    setState(() {
+      _imageDataBytes = imageDataBytes;
+    });
+  }
+
+  @override
+  @override
+  Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
+      alignment: Alignment.center,
       children: [
-        blurHash != null
-            ? BlurHash(
-                color: blurColor,
-                hash: blurHash!,
-                imageFit: BoxFit.cover,
-                duration: _kDuration,
-              )
-            : imageUrl != null
-                ? ClipRect(
-                    child: ImageFiltered(
-                      imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: Transform.scale(
-                          scale: 3,
-                          child: Image(
-                            image: ExtendedNetworkImageProvider(imageUrl!),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
-        if (imageUrl != null)
-          Image(
-            image: ExtendedNetworkImageProvider(imageUrl!),
+        if (_imageDataBytes != null)
+          Image.memory(
+            _imageDataBytes!,
+            fit: BoxFit.cover,
+          ),
+        if (widget.imageUrl != null)
+          CachedNetworkImage(
+            imageUrl: widget.imageUrl!,
             fit: BoxFit.contain,
-          )
+          ),
       ],
     );
+    // return AnimatedOpacity(
+    //   opacity: _imageDataBytes == null ? 0 : 0.8,
+    //   duration: kThemeAnimationDuration,
+    //   curve: Curves.easeIn,
+    //   child: _imageDataBytes == null
+    //       ? const SizedBox.shrink()
+    //       : Stack(
+    //           fit: StackFit.expand,
+    //           alignment: Alignment.center,
+    //           children: [
+    //             Image.memory(
+    //               _imageDataBytes!,
+    //               fit: BoxFit.cover,
+    //             ),
+    //             if (widget.imageUrl != null)
+    //               CachedNetworkImage(
+    //                 imageUrl: widget.imageUrl!,
+    //                 fit: BoxFit.contain,
+    //               ),
+    //           ],
+    //         ),
+    // );
   }
 }
 
@@ -314,12 +289,12 @@ class VideoPreviewState extends State<VideoPreview>
     return Stack(
       fit: StackFit.expand,
       children: <Widget>[
-        widget.backdropEnabled
+        widget.backdropEnabled && widget.blurHash != null
             ? ImageBackdrop(
                 widget.videoImageUrl,
                 key: ValueKey(widget.videoImageUrl),
                 boxFit: widget.boxFit,
-                blurHash: widget.blurHash,
+                blurHash: widget.blurHash!,
                 blurColor: widget.blurColor,
               )
             : widget.videoImageUrl != null
@@ -328,7 +303,7 @@ class VideoPreviewState extends State<VideoPreview>
                         child: ClipRRect(
                           borderRadius: widget.radius!,
                           child: Image(
-                            image: ExtendedNetworkImageProvider(
+                            image: CachedNetworkImageProvider(
                                 widget.videoImageUrl!),
                             fit: widget.boxFit,
                           ),
@@ -336,7 +311,7 @@ class VideoPreviewState extends State<VideoPreview>
                       )
                     : Image(
                         image:
-                            ExtendedNetworkImageProvider(widget.videoImageUrl!),
+                            CachedNetworkImageProvider(widget.videoImageUrl!),
                         fit: widget.boxFit,
                       )
                 : const SizedBox.shrink(),
