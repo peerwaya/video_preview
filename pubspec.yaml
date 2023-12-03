@@ -13,9 +13,7 @@ dependencies:
   provider: ^6.0.2
   visibility_detector: ^0.4.0+2
   cached_network_image: ^3.3.0
-  blurhash:
-    git:
-      url: https://github.com/peerwaya/blurhash.git
+  blurhash: ^1.1.1
   browser_adapter:
     git:
       url: https://github.com/KurobiHq/browser_adapter.git

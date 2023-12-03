@@ -44,6 +44,9 @@ class _ImageBackdropState extends State<ImageBackdrop> {
     } on PlatformException catch (e) {
       throw Exception(e.message);
     }
+    if (!mounted) {
+      return;
+    }
     setState(() {
       _imageDataBytes = imageDataBytes;
     });
@@ -52,44 +55,29 @@ class _ImageBackdropState extends State<ImageBackdrop> {
   @override
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      alignment: Alignment.center,
-      children: [
-        if (_imageDataBytes != null)
-          Image.memory(
-            _imageDataBytes!,
-            fit: BoxFit.cover,
-          ),
-        if (widget.imageUrl != null)
-          CachedNetworkImage(
-            imageUrl: widget.imageUrl!,
-            fit: BoxFit.contain,
-          ),
-      ],
-    );
-    // return AnimatedOpacity(
-    //   opacity: _imageDataBytes == null ? 0 : 0.8,
-    //   duration: kThemeAnimationDuration,
-    //   curve: Curves.easeIn,
-    //   child: _imageDataBytes == null
-    //       ? const SizedBox.shrink()
-    //       : Stack(
-    //           fit: StackFit.expand,
-    //           alignment: Alignment.center,
-    //           children: [
-    //             Image.memory(
-    //               _imageDataBytes!,
-    //               fit: BoxFit.cover,
-    //             ),
-    //             if (widget.imageUrl != null)
-    //               CachedNetworkImage(
-    //                 imageUrl: widget.imageUrl!,
-    //                 fit: BoxFit.contain,
-    //               ),
-    //           ],
-    //         ),
-    // );
+    return widget.imageUrl != null
+        ? Stack(
+            fit: StackFit.expand,
+            alignment: Alignment.center,
+            children: [
+              if (_imageDataBytes != null)
+                Image.memory(
+                  _imageDataBytes!,
+                  fit: BoxFit.cover,
+                ),
+              if (widget.imageUrl != null)
+                CachedNetworkImage(
+                  imageUrl: widget.imageUrl!,
+                  fit: widget.boxFit,
+                ),
+            ],
+          )
+        : _imageDataBytes != null
+            ? Image.memory(
+                _imageDataBytes!,
+                fit: BoxFit.cover,
+              )
+            : const SizedBox.shrink();
   }
 }
 
