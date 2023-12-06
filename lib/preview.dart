@@ -101,24 +101,27 @@ class VideoPreview extends StatefulWidget {
   final BorderRadius? radius;
   final Color blurColor;
   final bool backdropEnabled;
-  const VideoPreview(this.videoUrl,
-      {this.width,
-      this.height,
-      Key? key,
-      this.contentBuilder,
-      this.videoImageUrl,
-      this.blurHash,
-      this.autoPlay = true,
-      this.onClose,
-      this.boxFit = BoxFit.cover,
-      this.dataSourceType = DataSourceType.network,
-      this.backgroundImageUrl,
-      this.onPlayerControllerCreated,
-      this.observeRoute = true,
-      this.blurColor = Colors.black,
-      this.backdropEnabled = true,
-      this.radius})
-      : super(key: key);
+  final List<BoxShadow>? shadow;
+  const VideoPreview(
+    this.videoUrl, {
+    this.width,
+    this.height,
+    Key? key,
+    this.contentBuilder,
+    this.videoImageUrl,
+    this.blurHash,
+    this.autoPlay = true,
+    this.onClose,
+    this.boxFit = BoxFit.cover,
+    this.dataSourceType = DataSourceType.network,
+    this.backgroundImageUrl,
+    this.onPlayerControllerCreated,
+    this.observeRoute = true,
+    this.blurColor = Colors.black,
+    this.backdropEnabled = true,
+    this.radius,
+    this.shadow,
+  }) : super(key: key);
 
   @override
   VideoPreviewState createState() {
@@ -223,19 +226,22 @@ class VideoPreviewState extends State<VideoPreview>
         child: SizedBox(
           width: width,
           height: height,
-          child: VideoPlayerFocus(
-            _videoController,
-            widget.radius != null
-                ? ClipRRect(
-                    borderRadius: widget.radius!,
-                    child: VideoPlayer(
+          child: Container(
+            decoration: BoxDecoration(boxShadow: widget.shadow),
+            child: VideoPlayerFocus(
+              _videoController,
+              widget.radius != null
+                  ? ClipRRect(
+                      borderRadius: widget.radius!,
+                      child: VideoPlayer(
+                        _videoController,
+                      ),
+                    )
+                  : VideoPlayer(
                       _videoController,
                     ),
-                  )
-                : VideoPlayer(
-                    _videoController,
-                  ),
-            key: ValueKey(widget.videoUrl),
+              key: ValueKey(widget.videoUrl),
+            ),
           ),
         ),
       ),
@@ -253,19 +259,22 @@ class VideoPreviewState extends State<VideoPreview>
       child: Center(
         child: AspectRatio(
           aspectRatio: _videoController.value.aspectRatio,
-          child: VideoPlayerFocus(
-            _videoController,
-            widget.radius != null
-                ? ClipRRect(
-                    borderRadius: widget.radius!,
-                    child: VideoPlayer(
+          child: Container(
+            decoration: BoxDecoration(boxShadow: widget.shadow),
+            child: VideoPlayerFocus(
+              _videoController,
+              widget.radius != null
+                  ? ClipRRect(
+                      borderRadius: widget.radius!,
+                      child: VideoPlayer(
+                        _videoController,
+                      ),
+                    )
+                  : VideoPlayer(
                       _videoController,
                     ),
-                  )
-                : VideoPlayer(
-                    _videoController,
-                  ),
-            key: ValueKey(widget.videoUrl),
+              key: ValueKey(widget.videoUrl),
+            ),
           ),
         ),
       ),
