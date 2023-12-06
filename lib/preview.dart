@@ -17,11 +17,13 @@ class ImageBackdrop extends StatefulWidget {
   final String? imageUrl;
   final String blurHash;
   final Color blurColor;
+  final List<BoxShadow>? shadow;
 
   const ImageBackdrop(this.imageUrl,
       {this.boxFit = BoxFit.cover,
       required this.blurHash,
       this.blurColor = Colors.black,
+      this.shadow,
       Key? key})
       : super(key: key);
 
@@ -66,16 +68,22 @@ class _ImageBackdropState extends State<ImageBackdrop> {
                   fit: BoxFit.cover,
                 ),
               if (widget.imageUrl != null)
-                CachedNetworkImage(
-                  imageUrl: widget.imageUrl!,
-                  fit: widget.boxFit,
+                Container(
+                  decoration: BoxDecoration(boxShadow: widget.shadow),
+                  child: CachedNetworkImage(
+                    imageUrl: widget.imageUrl!,
+                    fit: widget.boxFit,
+                  ),
                 ),
             ],
           )
         : _imageDataBytes != null
-            ? Image.memory(
-                _imageDataBytes!,
-                fit: BoxFit.cover,
+            ? Container(
+                decoration: BoxDecoration(boxShadow: widget.shadow),
+                child: Image.memory(
+                  _imageDataBytes!,
+                  fit: BoxFit.cover,
+                ),
               )
             : const SizedBox.shrink();
   }
@@ -297,19 +305,27 @@ class VideoPreviewState extends State<VideoPreview>
             : widget.videoImageUrl != null
                 ? widget.radius != null
                     ? Center(
-                        child: ClipRRect(
-                          borderRadius: widget.radius!,
+                        child: Container(
+                          decoration: BoxDecoration(boxShadow: widget.shadow),
+                          child: ClipRRect(
+                            borderRadius: widget.radius!,
+                            child: Image(
+                              image: CachedNetworkImageProvider(
+                                  widget.videoImageUrl!),
+                              fit: widget.boxFit,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Container(
+                          decoration: BoxDecoration(boxShadow: widget.shadow),
                           child: Image(
                             image: CachedNetworkImageProvider(
                                 widget.videoImageUrl!),
                             fit: widget.boxFit,
                           ),
                         ),
-                      )
-                    : Image(
-                        image:
-                            CachedNetworkImageProvider(widget.videoImageUrl!),
-                        fit: widget.boxFit,
                       )
                 : const SizedBox.shrink(),
         ValueListenableBuilder(
