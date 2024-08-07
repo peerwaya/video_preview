@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:video_player/video_player.dart';
+import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class VideoPlayerFocus extends StatefulWidget {
-  final VideoPlayerController videoController;
+  final CachedVideoPlayerPlusController videoController;
   final Widget child;
   const VideoPlayerFocus(this.videoController, this.child, {Key? key})
       : super(key: key);

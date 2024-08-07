@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:blurhash/blurhash.dart';
 import 'package:flutter/services.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
-import 'package:video_player/video_player.dart';
+import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'interface.dart';
 import 'video_player_focus.dart';
 
@@ -90,7 +90,7 @@ class _ImageBackdropState extends State<ImageBackdrop> {
 }
 
 typedef OnVideoPlayerControllerCreated = void Function(
-    VideoPlayerController? controller);
+    CachedVideoPlayerPlusController? controller);
 
 class VideoPreview extends StatefulWidget {
   final VideoContentBuilder? contentBuilder;
@@ -111,26 +111,30 @@ class VideoPreview extends StatefulWidget {
   final bool backdropEnabled;
   final List<BoxShadow>? shadow;
   final bool longForm;
-  const VideoPreview(this.videoUrl,
-      {this.width,
-      this.height,
-      Key? key,
-      this.contentBuilder,
-      this.videoImageUrl,
-      this.blurHash,
-      this.autoPlay = true,
-      this.onClose,
-      this.boxFit = BoxFit.cover,
-      this.dataSourceType = DataSourceType.network,
-      this.backgroundImageUrl,
-      this.onPlayerControllerCreated,
-      this.observeRoute = true,
-      this.blurColor = Colors.black,
-      this.backdropEnabled = true,
-      this.radius,
-      this.shadow,
-      this.longForm = true})
-      : super(key: key);
+  final Duration? invalidateCacheIfOlderThan;
+
+  const VideoPreview(
+    this.videoUrl, {
+    this.width,
+    this.height,
+    Key? key,
+    this.contentBuilder,
+    this.videoImageUrl,
+    this.blurHash,
+    this.autoPlay = true,
+    this.onClose,
+    this.boxFit = BoxFit.cover,
+    this.dataSourceType = DataSourceType.network,
+    this.backgroundImageUrl,
+    this.onPlayerControllerCreated,
+    this.observeRoute = true,
+    this.blurColor = Colors.black,
+    this.backdropEnabled = true,
+    this.radius,
+    this.shadow,
+    this.longForm = true,
+    this.invalidateCacheIfOlderThan,
+  }) : super(key: key);
 
   @override
   VideoPreviewState createState() {
@@ -140,7 +144,7 @@ class VideoPreview extends StatefulWidget {
 
 class VideoPreviewState extends State<VideoPreview>
     with TickerProviderStateMixin {
-  late VideoPlayerController _videoController;
+  late CachedVideoPlayerPlusController _videoController;
   VoidCallback? videoPlayerListener;
   VoidCallback? videoProgressListener;
   Future<void>? _initializeVideoPlayerFuture;
@@ -154,22 +158,24 @@ class VideoPreviewState extends State<VideoPreview>
     super.initState();
     switch (widget.dataSourceType) {
       case DataSourceType.network:
-        _videoController = VideoPlayerController.networkUrl(
+        _videoController = CachedVideoPlayerPlusController.networkUrl(
           Uri.parse(widget.videoUrl),
+          invalidateCacheIfOlderThan:
+              widget.invalidateCacheIfOlderThan ?? const Duration(days: 30),
         );
         break;
       case DataSourceType.file:
-        _videoController = VideoPlayerController.file(
+        _videoController = CachedVideoPlayerPlusController.file(
           File(widget.videoUrl),
         );
         break;
       case DataSourceType.asset:
-        _videoController = VideoPlayerController.asset(
+        _videoController = CachedVideoPlayerPlusController.asset(
           widget.videoUrl,
         );
         break;
       case DataSourceType.contentUri:
-        _videoController = VideoPlayerController.contentUri(
+        _videoController = CachedVideoPlayerPlusController.contentUri(
           Uri.parse(widget.videoUrl),
         );
         break;
@@ -274,11 +280,11 @@ class VideoPreviewState extends State<VideoPreview>
                       widget.radius != null
                           ? ClipRRect(
                               borderRadius: widget.radius!,
-                              child: VideoPlayer(
+                              child: CachedVideoPlayerPlus(
                                 _videoController,
                               ),
                             )
-                          : VideoPlayer(
+                          : CachedVideoPlayerPlus(
                               _videoController,
                             ),
                       key: ValueKey(widget.videoUrl),
@@ -340,11 +346,11 @@ class VideoPreviewState extends State<VideoPreview>
                             widget.radius != null
                                 ? ClipRRect(
                                     borderRadius: widget.radius!,
-                                    child: VideoPlayer(
+                                    child: CachedVideoPlayerPlus(
                                       _videoController,
                                     ),
                                   )
-                                : VideoPlayer(
+                                : CachedVideoPlayerPlus(
                                     _videoController,
                                   ),
                             key: ValueKey(widget.videoUrl),
@@ -352,14 +358,16 @@ class VideoPreviewState extends State<VideoPreview>
                           PointerInterceptor(
                             child: SizedBox.expand(
                               child: widget.contentBuilder != null
-                                  ? widget.contentBuilder!(context,
+                                  ? widget.contentBuilder!(
+                                      context,
                                       play: _playVideo,
                                       pause: _pauseVideo,
                                       isPlaying: _isPlaying,
                                       isBuffering: _isBuffering,
                                       autoPlay: widget.autoPlay,
                                       videoInitialized:
-                                          _initializeVideoPlayerFuture)
+                                          _initializeVideoPlayerFuture,
+                                    )
                                   : null,
                             ),
                           ),
