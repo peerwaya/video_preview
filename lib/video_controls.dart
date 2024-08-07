@@ -66,7 +66,7 @@ class VideoControlstate extends State<VideoControls>
       height: 72.0,
       decoration:
           const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-      child: const Center(
+      child: Center(
         child: Icon(
           MdiIcons.play,
           color: Colors.white,
