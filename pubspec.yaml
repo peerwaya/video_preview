@@ -17,7 +17,7 @@ dependencies:
   browser_adapter:
     git:
       url: https://github.com/KurobiHq/browser_adapter.git
-  pointer_interceptor: ^0.9.3+6
+  pointer_interceptor: ^0.10.1+2 
   cached_video_player_plus: ^3.0.3
   material_design_icons_flutter: ^7.0.7296
   # video_player:

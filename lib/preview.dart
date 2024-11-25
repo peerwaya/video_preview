@@ -247,50 +247,64 @@ class VideoPreviewState extends State<VideoPreview>
             blurHash: widget.blurHash!,
             blurColor: widget.blurColor,
           ),
-        FittedBox(
-          fit: BoxFit.cover,
-          clipBehavior: Clip.hardEdge,
-          child: SizedBox(
-            width: width,
-            height: height,
-            child: Container(
-                decoration: BoxDecoration(boxShadow: widget.shadow),
-                child: Stack(
-                  children: [
-                    widget.backdropEnabled && widget.blurHash != null
-                        ? const SizedBox.shrink()
-                        : widget.videoImageUrl != null
-                            ? widget.radius != null
-                                ? ClipRRect(
-                                    borderRadius: widget.radius!,
-                                    child: Image(
-                                      image: CachedNetworkImageProvider(
-                                          widget.videoImageUrl!),
-                                      fit: widget.boxFit,
-                                    ),
-                                  )
-                                : Image(
-                                    image: CachedNetworkImageProvider(
-                                        widget.videoImageUrl!),
-                                    fit: widget.boxFit,
-                                  )
-                            : const SizedBox.shrink(),
-                    VideoPlayerFocus(
-                      _videoController,
-                      widget.radius != null
-                          ? ClipRRect(
-                              borderRadius: widget.radius!,
-                              child: CachedVideoPlayerPlus(
-                                _videoController,
-                              ),
-                            )
-                          : CachedVideoPlayerPlus(
-                              _videoController,
-                            ),
-                      key: ValueKey(widget.videoUrl),
-                    ),
-                  ],
-                )),
+        SizedBox(
+          width: width,
+          height: height,
+          child: Container(
+            decoration: BoxDecoration(boxShadow: widget.shadow),
+            child: Stack(
+              children: [
+                widget.backdropEnabled && widget.blurHash != null
+                    ? const SizedBox.shrink()
+                    : widget.videoImageUrl != null
+                        ? widget.radius != null
+                            ? ClipRRect(
+                                borderRadius: widget.radius!,
+                                child: Image(
+                                  image: CachedNetworkImageProvider(
+                                    widget.videoImageUrl!,
+                                  ),
+                                  fit: widget.boxFit,
+                                ),
+                              )
+                            : Image(
+                                image: CachedNetworkImageProvider(
+                                  widget.videoImageUrl!,
+                                ),
+                                fit: widget.boxFit,
+                              )
+                        : const SizedBox.shrink(),
+                VideoPlayerFocus(
+                  _videoController,
+                  widget.radius != null
+                      ? ClipRRect(
+                          borderRadius: widget.radius!,
+                          child: CachedVideoPlayerPlus(
+                            _videoController,
+                          ),
+                        )
+                      : CachedVideoPlayerPlus(
+                          _videoController,
+                        ),
+                  key: ValueKey(widget.videoUrl),
+                ),
+                PointerInterceptor(
+                  child: SizedBox.expand(
+                    child: widget.contentBuilder != null
+                        ? widget.contentBuilder!(
+                            context,
+                            play: _playVideo,
+                            pause: _pauseVideo,
+                            isPlaying: _isPlaying,
+                            isBuffering: _isBuffering,
+                            autoPlay: widget.autoPlay,
+                            videoInitialized: _initializeVideoPlayerFuture,
+                          )
+                        : null,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -299,6 +313,7 @@ class VideoPreviewState extends State<VideoPreview>
 
   @override
   Widget build(BuildContext context) {
+    print("box fit content: ${widget.boxFit}");
     return widget.boxFit == BoxFit.cover
         ? _buildVerticalVideo()
         : ValueListenableBuilder(
