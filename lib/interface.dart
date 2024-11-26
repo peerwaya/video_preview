@@ -16,8 +16,11 @@ typedef VideoContentBuilder = Widget Function(
   BuildContext context, {
   VoidCallback? play,
   VoidCallback? pause,
+  VoidCallback? mute,
+  VoidCallback? unMute,
   ValueNotifier<bool>? isPlaying,
   ValueNotifier<bool>? isBuffering,
+  ValueNotifier<bool>? isMuted,
   bool? autoPlay,
   Future<void>? videoInitialized,
 });

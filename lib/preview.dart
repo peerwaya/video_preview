@@ -149,8 +149,10 @@ class VideoPreviewState extends State<VideoPreview>
   VoidCallback? videoProgressListener;
   Future<void>? _initializeVideoPlayerFuture;
   StreamSubscription? _eventSub;
+  double _volume = 0.0;
   final ValueNotifier<bool> _isPlaying = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _isBuffering = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isMuted = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _videoLoaded = ValueNotifier<bool>(false);
 
   @override
@@ -196,6 +198,8 @@ class VideoPreviewState extends State<VideoPreview>
     }
     _videoLoaded.value = true;
     widget.onPlayerControllerCreated?.call(_videoController);
+    _isMuted.value = _videoController.value.volume == 0.0;
+    _volume = _videoController.value.volume;
     if (mounted) {
       setState(() {});
     }
@@ -204,6 +208,7 @@ class VideoPreviewState extends State<VideoPreview>
   void _checkIsPlaying() {
     _isPlaying.value = _videoController.value.isPlaying;
     _isBuffering.value = _videoController.value.isBuffering;
+    _isMuted.value = _videoController.value.volume == 0.0;
   }
 
   @override
@@ -219,6 +224,21 @@ class VideoPreviewState extends State<VideoPreview>
       return;
     }
     await _videoController.pause();
+  }
+
+  _mute() async {
+    if (!_videoController.value.isInitialized) {
+      return;
+    }
+    _volume = _videoController.value.volume;
+    await _videoController.setVolume(0.0);
+  }
+
+  _unMute() async {
+    if (!_videoController.value.isInitialized) {
+      return;
+    }
+    await _videoController.setVolume(_volume);
   }
 
   _playVideo() async {
@@ -295,6 +315,9 @@ class VideoPreviewState extends State<VideoPreview>
                             context,
                             play: _playVideo,
                             pause: _pauseVideo,
+                            mute: _mute,
+                            unMute: _unMute,
+                            isMuted: _isMuted,
                             isPlaying: _isPlaying,
                             isBuffering: _isBuffering,
                             autoPlay: widget.autoPlay,
@@ -313,7 +336,6 @@ class VideoPreviewState extends State<VideoPreview>
 
   @override
   Widget build(BuildContext context) {
-    print("box fit content: ${widget.boxFit}");
     return widget.boxFit == BoxFit.cover
         ? _buildVerticalVideo()
         : ValueListenableBuilder(
@@ -377,6 +399,9 @@ class VideoPreviewState extends State<VideoPreview>
                                       context,
                                       play: _playVideo,
                                       pause: _pauseVideo,
+                                      isMuted: _isMuted,
+                                      mute: _mute,
+                                      unMute: _unMute,
                                       isPlaying: _isPlaying,
                                       isBuffering: _isBuffering,
                                       autoPlay: widget.autoPlay,

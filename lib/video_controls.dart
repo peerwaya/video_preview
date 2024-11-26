@@ -15,8 +15,11 @@ const _shadow = <Shadow>[
 class VideoControls extends StatefulWidget {
   final ValueNotifier<bool>? isPlaying;
   final ValueNotifier<bool>? isBuffering;
+  final ValueNotifier<bool>? isMuted;
   final VoidCallback? play;
   final VoidCallback? pause;
+  final VoidCallback? mute;
+  final VoidCallback? unMute;
   final Future<void>? videoInitialized;
 
   const VideoControls({
@@ -25,6 +28,9 @@ class VideoControls extends StatefulWidget {
     this.pause,
     this.isPlaying,
     this.isBuffering,
+    this.isMuted,
+    this.mute,
+    this.unMute,
     this.videoInitialized,
   }) : super(key: key);
 
@@ -57,6 +63,14 @@ class VideoControlstate extends State<VideoControls>
       _pause();
     } else {
       _play();
+    }
+  }
+
+  void _toggleMute() {
+    if (widget.isMuted!.value) {
+      widget.unMute?.call();
+    } else {
+      widget.mute?.call();
     }
   }
 
@@ -128,25 +142,61 @@ class VideoControlstate extends State<VideoControls>
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: _togglePlayPause,
-          behavior: HitTestBehavior.translucent,
-          child: ValueListenableBuilder(
-            builder: (context, dynamic isPlaying, play) {
-              return AnimatedSwitcher(
-                duration: kThemeAnimationDuration,
-                switchInCurve: Curves.easeIn,
-                switchOutCurve: Curves.easeOut,
-                child: isPlaying
-                    ? widget.isBuffering != null
-                        ? _buildBuffering()
-                        : const SizedBox.shrink()
-                    : play,
-              );
-            },
-            child: _buildPlay(),
-            valueListenable: widget.isPlaying!,
-          ),
-        ),
+            onTap: _togglePlayPause,
+            behavior: HitTestBehavior.translucent,
+            child: Stack(
+              children: [
+                Center(
+                  child: ValueListenableBuilder(
+                    builder: (context, dynamic isPlaying, play) {
+                      return AnimatedSwitcher(
+                        duration: kThemeAnimationDuration,
+                        switchInCurve: Curves.easeIn,
+                        switchOutCurve: Curves.easeOut,
+                        child: isPlaying
+                            ? widget.isBuffering != null
+                                ? _buildBuffering()
+                                : const SizedBox.shrink()
+                            : play,
+                      );
+                    },
+                    child: _buildPlay(),
+                    valueListenable: widget.isPlaying!,
+                  ),
+                ),
+                if (widget.isMuted != null)
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: ValueListenableBuilder(
+                      builder: (context, bool isMuted, play) {
+                        return SizedBox(
+                          // width: 24,
+                          // height: 24,
+                          child: IconButton(
+                            onPressed: _toggleMute,
+                            //padding: const EdgeInsets.all(0),
+                            icon: isMuted
+                                ? const Icon(
+                                    Icons.volume_off,
+                                    color: Colors.white,
+                                    shadows: _shadow,
+                                    size: 18,
+                                  )
+                                : const Icon(
+                                    Icons.volume_up,
+                                    color: Colors.white,
+                                    shadows: _shadow,
+                                    size: 18,
+                                  ),
+                          ),
+                        );
+                      },
+                      child: _buildPlay(),
+                      valueListenable: widget.isMuted!,
+                    ),
+                  )
+              ],
+            )),
       ),
     );
   }
