@@ -192,7 +192,12 @@ class VideoPreviewState extends State<VideoPreview>
     _initializeVideoPlayerFuture = _videoController.initialize();
     await _initializeVideoPlayerFuture;
     if ((kIsWeb && widget.autoPlay) || widget.isMuted) {
+      _volume = _videoController.value.volume;
       await _videoController.setVolume(0.0);
+      _isMuted.value = true;
+    } else {
+      _isMuted.value = _videoController.value.volume == 0.0;
+      _volume = _videoController.value.volume;
     }
     _videoController.setLooping(true);
     if (widget.autoPlay) {
@@ -200,8 +205,6 @@ class VideoPreviewState extends State<VideoPreview>
     }
     _videoLoaded.value = true;
     widget.onPlayerControllerCreated?.call(_videoController);
-    _isMuted.value = _videoController.value.volume == 0.0;
-    _volume = _videoController.value.volume;
     if (mounted) {
       setState(() {});
     }
