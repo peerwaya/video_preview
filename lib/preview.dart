@@ -112,6 +112,7 @@ class VideoPreview extends StatefulWidget {
   final List<BoxShadow>? shadow;
   final bool longForm;
   final Duration? invalidateCacheIfOlderThan;
+  final bool isMuted;
 
   const VideoPreview(
     this.videoUrl, {
@@ -134,6 +135,7 @@ class VideoPreview extends StatefulWidget {
     this.shadow,
     this.longForm = true,
     this.invalidateCacheIfOlderThan,
+    this.isMuted = false,
   }) : super(key: key);
 
   @override
@@ -189,7 +191,7 @@ class VideoPreviewState extends State<VideoPreview>
   _initVideo() async {
     _initializeVideoPlayerFuture = _videoController.initialize();
     await _initializeVideoPlayerFuture;
-    if (kIsWeb && widget.autoPlay) {
+    if ((kIsWeb && widget.autoPlay) || widget.isMuted) {
       await _videoController.setVolume(0.0);
     }
     _videoController.setLooping(true);
