@@ -183,8 +183,8 @@ class VideoPreviewState extends State<VideoPreview>
         );
         break;
     }
-    _videoPlayer.controller.addListener(_checkIsPlaying);
     _initVideo();
+    _videoPlayer.controller.addListener(_checkIsPlaying);
   }
 
   _initVideo() async {
