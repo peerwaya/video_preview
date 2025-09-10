@@ -184,7 +184,6 @@ class VideoPreviewState extends State<VideoPreview>
         break;
     }
     _initVideo();
-    _videoPlayer.controller.addListener(_checkIsPlaying);
   }
 
   _initVideo() async {
@@ -203,6 +202,7 @@ class VideoPreviewState extends State<VideoPreview>
       _videoPlayer.controller.play();
     }
     _videoLoaded.value = true;
+    _videoPlayer.controller.addListener(_checkIsPlaying);
     widget.onPlayerControllerCreated?.call(_videoPlayer.controller);
     if (mounted) {
       setState(() {});
