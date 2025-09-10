@@ -12,13 +12,14 @@ dependencies:
     sdk: flutter
   provider: ^6.0.2
   visibility_detector: ^0.4.0+2
-  cached_network_image: ^3.3.0
+  cached_network_image: ^3.4.1
   blurhash: ^1.1.1
   browser_adapter:
     git:
       url: https://github.com/KurobiHq/browser_adapter.git
   pointer_interceptor: ^0.10.1+2 
-  cached_video_player_plus: ^3.0.3
+  video_player: ^2.10.0
+  cached_video_player_plus: ^4.0.4
   material_design_icons_flutter: ^7.0.7296
   # video_player:
   #   git:

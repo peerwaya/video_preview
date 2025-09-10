@@ -7,10 +7,9 @@ import 'package:blurhash/blurhash.dart';
 import 'package:flutter/services.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
+import 'package:video_player/video_player.dart';
 import 'interface.dart';
 import 'video_player_focus.dart';
-
-const _kDuration = Duration(milliseconds: 600);
 
 class ImageBackdrop extends StatefulWidget {
   final BoxFit boxFit;
@@ -90,7 +89,7 @@ class _ImageBackdropState extends State<ImageBackdrop> {
 }
 
 typedef OnVideoPlayerControllerCreated = void Function(
-    CachedVideoPlayerPlusController? controller);
+    VideoPlayerController? controller);
 
 class VideoPreview extends StatefulWidget {
   final VideoContentBuilder? contentBuilder;
@@ -146,7 +145,7 @@ class VideoPreview extends StatefulWidget {
 
 class VideoPreviewState extends State<VideoPreview>
     with TickerProviderStateMixin {
-  late CachedVideoPlayerPlusController _videoController;
+  late CachedVideoPlayerPlus _videoPlayer;
   VoidCallback? videoPlayerListener;
   VoidCallback? videoProgressListener;
   Future<void>? _initializeVideoPlayerFuture;
@@ -162,105 +161,106 @@ class VideoPreviewState extends State<VideoPreview>
     super.initState();
     switch (widget.dataSourceType) {
       case DataSourceType.network:
-        _videoController = CachedVideoPlayerPlusController.networkUrl(
+        _videoPlayer = CachedVideoPlayerPlus.networkUrl(
           Uri.parse(widget.videoUrl),
           invalidateCacheIfOlderThan:
               widget.invalidateCacheIfOlderThan ?? const Duration(days: 30),
         );
         break;
       case DataSourceType.file:
-        _videoController = CachedVideoPlayerPlusController.file(
+        _videoPlayer = CachedVideoPlayerPlus.file(
           File(widget.videoUrl),
         );
         break;
       case DataSourceType.asset:
-        _videoController = CachedVideoPlayerPlusController.asset(
+        _videoPlayer = CachedVideoPlayerPlus.asset(
           widget.videoUrl,
         );
         break;
       case DataSourceType.contentUri:
-        _videoController = CachedVideoPlayerPlusController.contentUri(
+        _videoPlayer = CachedVideoPlayerPlus.contentUri(
           Uri.parse(widget.videoUrl),
         );
         break;
     }
-    _videoController.addListener(_checkIsPlaying);
+    _videoPlayer.controller.addListener(_checkIsPlaying);
     _initVideo();
   }
 
   _initVideo() async {
-    _initializeVideoPlayerFuture = _videoController.initialize();
+    _initializeVideoPlayerFuture = _videoPlayer.initialize();
     await _initializeVideoPlayerFuture;
     if ((kIsWeb && widget.autoPlay) || widget.isMuted) {
-      _volume = _videoController.value.volume;
-      await _videoController.setVolume(0.0);
+      _volume = _videoPlayer.controller.value.volume;
+      await _videoPlayer.controller.setVolume(0.0);
       _isMuted.value = true;
     } else {
-      _isMuted.value = _videoController.value.volume == 0.0;
-      _volume = _videoController.value.volume;
+      _isMuted.value = _videoPlayer.controller.value.volume == 0.0;
+      _volume = _videoPlayer.controller.value.volume;
     }
-    _videoController.setLooping(true);
+    _videoPlayer.controller.setLooping(true);
     if (widget.autoPlay) {
-      _videoController.play();
+      _videoPlayer.controller.play();
     }
     _videoLoaded.value = true;
-    widget.onPlayerControllerCreated?.call(_videoController);
+    widget.onPlayerControllerCreated?.call(_videoPlayer.controller);
     if (mounted) {
       setState(() {});
     }
   }
 
   void _checkIsPlaying() {
-    _isPlaying.value = _videoController.value.isPlaying;
-    _isBuffering.value = _videoController.value.isBuffering;
-    _isMuted.value = _videoController.value.volume == 0.0;
+    _isPlaying.value = _videoPlayer.controller.value.isPlaying;
+    _isBuffering.value = _videoPlayer.controller.value.isBuffering;
+    _isMuted.value = _videoPlayer.controller.value.volume == 0.0;
   }
 
   @override
   dispose() {
-    _videoController.removeListener(_checkIsPlaying);
-    _videoController.dispose();
+    _videoPlayer.controller.removeListener(_checkIsPlaying);
+    _videoPlayer.dispose();
     _eventSub?.cancel();
     super.dispose();
   }
 
   _pauseVideo() async {
-    if (!_videoController.value.isInitialized) {
+    if (!_videoPlayer.controller.value.isInitialized) {
       return;
     }
-    await _videoController.pause();
+    await _videoPlayer.controller.pause();
   }
 
   _mute() async {
-    if (!_videoController.value.isInitialized) {
+    if (!_videoPlayer.controller.value.isInitialized) {
       return;
     }
-    _volume = _videoController.value.volume;
-    await _videoController.setVolume(0.0);
+    _volume = _videoPlayer.controller.value.volume;
+    await _videoPlayer.controller.setVolume(0.0);
   }
 
   _unMute() async {
-    if (!_videoController.value.isInitialized) {
+    if (!_videoPlayer.controller.value.isInitialized) {
       return;
     }
-    await _videoController.setVolume(_volume);
+    await _videoPlayer.controller.setVolume(_volume);
   }
 
   _playVideo() async {
-    if (!_videoController.value.isInitialized) {
+    if (!_videoPlayer.controller.value.isInitialized) {
       return;
     }
-    if (_videoController.value.position >= _videoController.value.duration) {
-      _videoController.seekTo(const Duration(seconds: 0));
+    if (_videoPlayer.controller.value.position >=
+        _videoPlayer.controller.value.duration) {
+      _videoPlayer.controller.seekTo(const Duration(seconds: 0));
     }
-    await _videoController.play();
+    await _videoPlayer.controller.play();
   }
 
   Widget _buildVerticalVideo() {
     double width =
-        widget.width?.toDouble() ?? _videoController.value.size.width;
+        widget.width?.toDouble() ?? _videoPlayer.controller.value.size.width;
     double height =
-        widget.height?.toDouble() ?? _videoController.value.size.height;
+        widget.height?.toDouble() ?? _videoPlayer.controller.value.size.height;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -300,16 +300,16 @@ class VideoPreviewState extends State<VideoPreview>
                               )
                         : const SizedBox.shrink(),
                 VideoPlayerFocus(
-                  _videoController,
+                  _videoPlayer.controller,
                   widget.radius != null
                       ? ClipRRect(
                           borderRadius: widget.radius!,
-                          child: CachedVideoPlayerPlus(
-                            _videoController,
+                          child: VideoPlayer(
+                            _videoPlayer.controller,
                           ),
                         )
-                      : CachedVideoPlayerPlus(
-                          _videoController,
+                      : VideoPlayer(
+                          _videoPlayer.controller,
                         ),
                   key: ValueKey(widget.videoUrl),
                 ),
@@ -344,7 +344,7 @@ class VideoPreviewState extends State<VideoPreview>
     return widget.boxFit == BoxFit.cover
         ? _buildVerticalVideo()
         : ValueListenableBuilder(
-            valueListenable: _videoController,
+            valueListenable: _videoPlayer.controller,
             builder: (context, value, child) {
               final width =
                   widget.width ?? (value.isInitialized ? value.size.width : 0);
@@ -384,16 +384,16 @@ class VideoPreviewState extends State<VideoPreview>
                                         )
                                   : const SizedBox.shrink(),
                           VideoPlayerFocus(
-                            _videoController,
+                            _videoPlayer.controller,
                             widget.radius != null
                                 ? ClipRRect(
                                     borderRadius: widget.radius!,
-                                    child: CachedVideoPlayerPlus(
-                                      _videoController,
+                                    child: VideoPlayer(
+                                      _videoPlayer.controller,
                                     ),
                                   )
-                                : CachedVideoPlayerPlus(
-                                    _videoController,
+                                : VideoPlayer(
+                                    _videoPlayer.controller,
                                   ),
                             key: ValueKey(widget.videoUrl),
                           ),
