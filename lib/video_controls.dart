@@ -172,16 +172,6 @@ class VideoControlstate extends State<VideoControls>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (widget.onFullscreen != null)
-                          IconButton(
-                            onPressed: widget.onFullscreen,
-                            icon: const Icon(
-                              Icons.fullscreen,
-                              color: Colors.white,
-                              shadows: _shadow,
-                              size: 18,
-                            ),
-                          ),
                         ValueListenableBuilder(
                           builder: (context, bool isMuted, play) {
                             return SizedBox(
@@ -195,13 +185,13 @@ class VideoControlstate extends State<VideoControls>
                                         Icons.volume_off,
                                         color: Colors.white,
                                         shadows: _shadow,
-                                        size: 18,
+                                        size: 20,
                                       )
                                     : const Icon(
                                         Icons.volume_up,
                                         color: Colors.white,
                                         shadows: _shadow,
-                                        size: 18,
+                                        size: 20,
                                       ),
                               ),
                             );
@@ -209,6 +199,16 @@ class VideoControlstate extends State<VideoControls>
                           child: _buildPlay(),
                           valueListenable: widget.isMuted!,
                         ),
+                        if (widget.onFullscreen != null)
+                          IconButton(
+                            onPressed: widget.onFullscreen,
+                            icon: const Icon(
+                              Icons.fullscreen,
+                              color: Colors.white,
+                              shadows: _shadow,
+                              size: 20,
+                            ),
+                          ),
                       ],
                     ),
                   )

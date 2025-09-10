@@ -112,6 +112,7 @@ class VideoPreview extends StatefulWidget {
   final bool longForm;
   final Duration? invalidateCacheIfOlderThan;
   final bool isMuted;
+  final bool showProgressIndicator;
 
   const VideoPreview(
     this.videoUrl, {
@@ -135,6 +136,7 @@ class VideoPreview extends StatefulWidget {
     this.longForm = true,
     this.invalidateCacheIfOlderThan,
     this.isMuted = false,
+    this.showProgressIndicator = false,
   }) : super(key: key);
 
   @override
@@ -358,72 +360,87 @@ class VideoPreviewState extends State<VideoPreview>
                   }
                   final videoContent = Center(
                     child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: widget.shadow,
-                      ),
-                      child: AspectRatio(
-                        aspectRatio: aspectRatio.toDouble(),
-                        child: Center(
-                          child: Stack(
-                            //fit: StackFit.loose,
-                            children: [
-                              widget.backdropEnabled && widget.blurHash != null
-                                  ? const SizedBox.shrink()
-                                  : widget.videoImageUrl != null
-                                      ? widget.radius != null
+                        decoration: BoxDecoration(
+                          boxShadow: widget.shadow,
+                        ),
+                        child: Column(
+                          children: [
+                            AspectRatio(
+                              aspectRatio: aspectRatio.toDouble(),
+                              child: Center(
+                                child: Stack(
+                                  //fit: StackFit.loose,
+                                  children: [
+                                    widget.backdropEnabled &&
+                                            widget.blurHash != null
+                                        ? const SizedBox.shrink()
+                                        : widget.videoImageUrl != null
+                                            ? widget.radius != null
+                                                ? ClipRRect(
+                                                    borderRadius:
+                                                        widget.radius!,
+                                                    child: Image(
+                                                      image: CachedNetworkImageProvider(
+                                                          widget
+                                                              .videoImageUrl!),
+                                                      fit: widget.boxFit,
+                                                    ),
+                                                  )
+                                                : Image(
+                                                    image:
+                                                        CachedNetworkImageProvider(
+                                                            widget
+                                                                .videoImageUrl!),
+                                                    fit: widget.boxFit,
+                                                  )
+                                            : const SizedBox.shrink(),
+                                    VideoPlayerFocus(
+                                      _videoPlayer.controller,
+                                      widget.radius != null
                                           ? ClipRRect(
                                               borderRadius: widget.radius!,
-                                              child: Image(
-                                                image:
-                                                    CachedNetworkImageProvider(
-                                                        widget.videoImageUrl!),
-                                                fit: widget.boxFit,
+                                              child: VideoPlayer(
+                                                _videoPlayer.controller,
                                               ),
                                             )
-                                          : Image(
-                                              image: CachedNetworkImageProvider(
-                                                  widget.videoImageUrl!),
-                                              fit: widget.boxFit,
-                                            )
-                                      : const SizedBox.shrink(),
-                              VideoPlayerFocus(
-                                _videoPlayer.controller,
-                                widget.radius != null
-                                    ? ClipRRect(
-                                        borderRadius: widget.radius!,
-                                        child: VideoPlayer(
-                                          _videoPlayer.controller,
-                                        ),
-                                      )
-                                    : VideoPlayer(
-                                        _videoPlayer.controller,
+                                          : VideoPlayer(
+                                              _videoPlayer.controller,
+                                            ),
+                                      key: ValueKey(widget.videoUrl),
+                                    ),
+                                    PointerInterceptor(
+                                      child: SizedBox.expand(
+                                        child: widget.contentBuilder != null
+                                            ? widget.contentBuilder!(
+                                                context,
+                                                play: _playVideo,
+                                                pause: _pauseVideo,
+                                                isMuted: _isMuted,
+                                                mute: _mute,
+                                                unMute: _unMute,
+                                                isPlaying: _isPlaying,
+                                                isBuffering: _isBuffering,
+                                                autoPlay: widget.autoPlay,
+                                                videoInitialized:
+                                                    _initializeVideoPlayerFuture,
+                                              )
+                                            : null,
                                       ),
-                                key: ValueKey(widget.videoUrl),
-                              ),
-                              PointerInterceptor(
-                                child: SizedBox.expand(
-                                  child: widget.contentBuilder != null
-                                      ? widget.contentBuilder!(
-                                          context,
-                                          play: _playVideo,
-                                          pause: _pauseVideo,
-                                          isMuted: _isMuted,
-                                          mute: _mute,
-                                          unMute: _unMute,
-                                          isPlaying: _isPlaying,
-                                          isBuffering: _isBuffering,
-                                          autoPlay: widget.autoPlay,
-                                          videoInitialized:
-                                              _initializeVideoPlayerFuture,
-                                        )
-                                      : null,
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                            ),
+                            if (widget.showProgressIndicator)
+                              VideoProgressIndicator(
+                                _videoPlayer.controller,
+                                allowScrubbing:
+                                    true, // Enable scrubbing functionality
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0, horizontal: 16.0),
+                              ),
+                          ],
+                        )),
                   );
                   return widget.longForm
                       ? videoContent
