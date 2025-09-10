@@ -217,7 +217,6 @@ class VideoPreviewState extends State<VideoPreview>
 
   @override
   dispose() {
-    _videoPlayer.controller.removeListener(_checkIsPlaying);
     _videoPlayer.dispose();
     _eventSub?.cancel();
     super.dispose();
