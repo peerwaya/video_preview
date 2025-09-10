@@ -21,18 +21,20 @@ class VideoControls extends StatefulWidget {
   final VoidCallback? mute;
   final VoidCallback? unMute;
   final Future<void>? videoInitialized;
+  final VoidCallback? onFullscreen;
 
-  const VideoControls({
-    Key? key,
-    this.play,
-    this.pause,
-    this.isPlaying,
-    this.isBuffering,
-    this.isMuted,
-    this.mute,
-    this.unMute,
-    this.videoInitialized,
-  }) : super(key: key);
+  const VideoControls(
+      {Key? key,
+      this.play,
+      this.pause,
+      this.isPlaying,
+      this.isBuffering,
+      this.isMuted,
+      this.mute,
+      this.unMute,
+      this.videoInitialized,
+      this.onFullscreen})
+      : super(key: key);
 
   @override
   VideoControlstate createState() {
@@ -167,32 +169,47 @@ class VideoControlstate extends State<VideoControls>
                 if (widget.isMuted != null)
                   Align(
                     alignment: Alignment.bottomRight,
-                    child: ValueListenableBuilder(
-                      builder: (context, bool isMuted, play) {
-                        return SizedBox(
-                          // width: 24,
-                          // height: 24,
-                          child: IconButton(
-                            onPressed: _toggleMute,
-                            //padding: const EdgeInsets.all(0),
-                            icon: isMuted
-                                ? const Icon(
-                                    Icons.volume_off,
-                                    color: Colors.white,
-                                    shadows: _shadow,
-                                    size: 18,
-                                  )
-                                : const Icon(
-                                    Icons.volume_up,
-                                    color: Colors.white,
-                                    shadows: _shadow,
-                                    size: 18,
-                                  ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (widget.onFullscreen != null)
+                          IconButton(
+                            onPressed: widget.onFullscreen,
+                            icon: const Icon(
+                              Icons.fullscreen,
+                              color: Colors.white,
+                              shadows: _shadow,
+                              size: 18,
+                            ),
                           ),
-                        );
-                      },
-                      child: _buildPlay(),
-                      valueListenable: widget.isMuted!,
+                        ValueListenableBuilder(
+                          builder: (context, bool isMuted, play) {
+                            return SizedBox(
+                              // width: 24,
+                              // height: 24,
+                              child: IconButton(
+                                onPressed: _toggleMute,
+                                //padding: const EdgeInsets.all(0),
+                                icon: isMuted
+                                    ? const Icon(
+                                        Icons.volume_off,
+                                        color: Colors.white,
+                                        shadows: _shadow,
+                                        size: 18,
+                                      )
+                                    : const Icon(
+                                        Icons.volume_up,
+                                        color: Colors.white,
+                                        shadows: _shadow,
+                                        size: 18,
+                                      ),
+                              ),
+                            );
+                          },
+                          child: _buildPlay(),
+                          valueListenable: widget.isMuted!,
+                        ),
+                      ],
                     ),
                   )
               ],
