@@ -22,19 +22,29 @@ class VideoControls extends StatefulWidget {
   final VoidCallback? unMute;
   final Future<void>? videoInitialized;
   final VoidCallback? onFullscreen;
+  final String? playText;
+  final String? pauseText;
+  final String? fullscreenText;
+  final String? muteText;
+  final String? unMuteText;
 
-  const VideoControls(
-      {Key? key,
-      this.play,
-      this.pause,
-      this.isPlaying,
-      this.isBuffering,
-      this.isMuted,
-      this.mute,
-      this.unMute,
-      this.videoInitialized,
-      this.onFullscreen})
-      : super(key: key);
+  const VideoControls({
+    Key? key,
+    this.play,
+    this.pause,
+    this.isPlaying,
+    this.isBuffering,
+    this.isMuted,
+    this.mute,
+    this.unMute,
+    this.videoInitialized,
+    this.onFullscreen,
+    this.playText,
+    this.pauseText,
+    this.fullscreenText,
+    this.muteText,
+    this.unMuteText,
+  }) : super(key: key);
 
   @override
   VideoControlstate createState() {
@@ -85,6 +95,7 @@ class VideoControlstate extends State<VideoControls>
       child: Center(
         child: Icon(
           MdiIcons.play,
+          semanticLabel: widget.playText,
           color: Colors.white,
           shadows: _shadow,
           size: 48.0,
@@ -178,6 +189,9 @@ class VideoControlstate extends State<VideoControls>
                               // width: 24,
                               // height: 24,
                               child: IconButton(
+                                tooltip: isMuted
+                                    ? widget.muteText
+                                    : widget.unMuteText,
                                 onPressed: _toggleMute,
                                 //padding: const EdgeInsets.all(0),
                                 icon: isMuted
@@ -201,6 +215,7 @@ class VideoControlstate extends State<VideoControls>
                         ),
                         if (widget.onFullscreen != null)
                           IconButton(
+                            tooltip: widget.fullscreenText,
                             onPressed: widget.onFullscreen,
                             icon: const Icon(
                               Icons.fullscreen,

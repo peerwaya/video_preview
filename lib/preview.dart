@@ -360,12 +360,15 @@ class VideoPreviewState extends State<VideoPreview>
                   }
                   final videoContent = Center(
                     child: Container(
-                        decoration: BoxDecoration(
-                          boxShadow: widget.shadow,
-                        ),
-                        child: Column(
-                          children: [
-                            AspectRatio(
+                      decoration: BoxDecoration(
+                        boxShadow: widget.shadow,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Center(
+                            child: AspectRatio(
                               aspectRatio: aspectRatio.toDouble(),
                               child: Center(
                                 child: Stack(
@@ -431,16 +434,18 @@ class VideoPreviewState extends State<VideoPreview>
                                 ),
                               ),
                             ),
-                            if (widget.showProgressIndicator)
-                              VideoProgressIndicator(
-                                _videoPlayer.controller,
-                                allowScrubbing:
-                                    true, // Enable scrubbing functionality
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 16.0),
-                              ),
-                          ],
-                        )),
+                          ),
+                          if (widget.showProgressIndicator)
+                            VideoProgressIndicator(
+                              _videoPlayer.controller,
+                              allowScrubbing:
+                                  true, // Enable scrubbing functionality
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 16.0),
+                            )
+                        ],
+                      ),
+                    ),
                   );
                   return widget.longForm
                       ? videoContent
