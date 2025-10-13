@@ -109,7 +109,6 @@ class VideoPreview extends StatefulWidget {
   final Color blurColor;
   final bool backdropEnabled;
   final List<BoxShadow>? shadow;
-  final bool longForm;
   final Duration? invalidateCacheIfOlderThan;
   final bool isMuted;
   final bool showProgressIndicator;
@@ -133,7 +132,6 @@ class VideoPreview extends StatefulWidget {
     this.backdropEnabled = true,
     this.radius,
     this.shadow,
-    this.longForm = true,
     this.invalidateCacheIfOlderThan,
     this.isMuted = false,
     this.showProgressIndicator = false,
@@ -257,205 +255,89 @@ class VideoPreviewState extends State<VideoPreview>
     await _videoPlayer.controller.play();
   }
 
-  Widget _buildVerticalVideo() {
-    double width =
-        widget.width?.toDouble() ?? _videoPlayer.controller.value.size.width;
-    double height =
-        widget.height?.toDouble() ?? _videoPlayer.controller.value.size.height;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        if (widget.backdropEnabled && widget.blurHash != null)
-          ImageBackdrop(
-            widget.videoImageUrl,
-            key: ValueKey(widget.videoImageUrl),
-            boxFit: widget.boxFit,
-            blurHash: widget.blurHash!,
-            blurColor: widget.blurColor,
-          ),
-        SizedBox(
-          width: width,
-          height: height,
-          child: Container(
-            decoration: BoxDecoration(boxShadow: widget.shadow),
-            child: Stack(
-              children: [
-                widget.backdropEnabled && widget.blurHash != null
-                    ? const SizedBox.shrink()
-                    : widget.videoImageUrl != null
-                        ? widget.radius != null
-                            ? ClipRRect(
-                                borderRadius: widget.radius!,
-                                child: Image(
-                                  image: CachedNetworkImageProvider(
-                                    widget.videoImageUrl!,
-                                  ),
-                                  fit: widget.boxFit,
-                                ),
-                              )
-                            : Image(
-                                image: CachedNetworkImageProvider(
-                                  widget.videoImageUrl!,
-                                ),
-                                fit: widget.boxFit,
-                              )
-                        : const SizedBox.shrink(),
-                VideoPlayerFocus(
-                  _videoPlayer.controller,
-                  widget.radius != null
-                      ? ClipRRect(
-                          borderRadius: widget.radius!,
-                          child: VideoPlayer(
-                            _videoPlayer.controller,
-                          ),
-                        )
-                      : VideoPlayer(
-                          _videoPlayer.controller,
-                        ),
-                  key: ValueKey(widget.videoUrl),
-                ),
-                PointerInterceptor(
-                  child: SizedBox.expand(
-                    child: widget.contentBuilder != null
-                        ? widget.contentBuilder!(
-                            context,
-                            play: _playVideo,
-                            pause: _pauseVideo,
-                            mute: _mute,
-                            unMute: _unMute,
-                            isMuted: _isMuted,
-                            isPlaying: _isPlaying,
-                            isBuffering: _isBuffering,
-                            autoPlay: widget.autoPlay,
-                            videoInitialized: _initializeVideoPlayerFuture,
-                          )
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return widget.boxFit == BoxFit.cover
-        ? _videoPlayer.isInitialized
-            ? _buildVerticalVideo()
-            : const SizedBox.shrink()
-        : _videoPlayer.isInitialized
-            ? ValueListenableBuilder(
-                valueListenable: _videoPlayer.controller,
-                builder: (context, value, child) {
-                  final width = widget.width ??
-                      (value.isInitialized ? value.size.width : 0);
-                  final height = widget.height ??
-                      (value.isInitialized ? value.size.height : 0);
-                  final aspectRatio = height == 0 ? 0 : width / height;
-                  if (aspectRatio <= 0) {
-                    return const SizedBox.shrink();
-                  }
-                  final videoContent = Center(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: widget.shadow,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Center(
-                            child: AspectRatio(
-                              aspectRatio: aspectRatio.toDouble(),
-                              child: Center(
-                                child: Stack(
-                                  //fit: StackFit.loose,
-                                  children: [
-                                    widget.backdropEnabled &&
-                                            widget.blurHash != null
-                                        ? const SizedBox.shrink()
-                                        : widget.videoImageUrl != null
-                                            ? widget.radius != null
-                                                ? ClipRRect(
-                                                    borderRadius:
-                                                        widget.radius!,
-                                                    child: Image(
-                                                      image: CachedNetworkImageProvider(
-                                                          widget
-                                                              .videoImageUrl!),
-                                                      fit: widget.boxFit,
-                                                    ),
-                                                  )
-                                                : Image(
-                                                    image:
-                                                        CachedNetworkImageProvider(
-                                                            widget
-                                                                .videoImageUrl!),
-                                                    fit: widget.boxFit,
-                                                  )
-                                            : const SizedBox.shrink(),
-                                    VideoPlayerFocus(
-                                      _videoPlayer.controller,
-                                      widget.radius != null
-                                          ? ClipRRect(
-                                              borderRadius: widget.radius!,
-                                              child: VideoPlayer(
-                                                _videoPlayer.controller,
-                                              ),
-                                            )
-                                          : VideoPlayer(
-                                              _videoPlayer.controller,
-                                            ),
-                                      key: ValueKey(widget.videoUrl),
-                                    ),
-                                    PointerInterceptor(
-                                      child: SizedBox.expand(
-                                        child: widget.contentBuilder != null
-                                            ? widget.contentBuilder!(
-                                                context,
-                                                play: _playVideo,
-                                                pause: _pauseVideo,
-                                                isMuted: _isMuted,
-                                                mute: _mute,
-                                                unMute: _unMute,
-                                                isPlaying: _isPlaying,
-                                                isBuffering: _isBuffering,
-                                                autoPlay: widget.autoPlay,
-                                                videoInitialized:
-                                                    _initializeVideoPlayerFuture,
-                                              )
-                                            : null,
-                                      ),
-                                    ),
-                                  ],
+    return _videoPlayer.isInitialized
+        ? ValueListenableBuilder(
+            valueListenable: _videoPlayer.controller,
+            builder: (context, value, child) {
+              if (!value.isInitialized && widget.videoImageUrl != null) {
+                return widget.radius != null
+                    ? ClipRRect(
+                        borderRadius: widget.radius!,
+                        child: Image(
+                          image:
+                              CachedNetworkImageProvider(widget.videoImageUrl!),
+                          fit: widget.boxFit,
+                        ),
+                      )
+                    : Image(
+                        image:
+                            CachedNetworkImageProvider(widget.videoImageUrl!),
+                        fit: widget.boxFit,
+                      );
+              }
+              final width =
+                  widget.width ?? (value.isInitialized ? value.size.width : 0);
+              final height = widget.height ??
+                  (value.isInitialized ? value.size.height : 0);
+              final aspectRatio = height == 0 ? 0 : width / height;
+              if (aspectRatio <= 0) {
+                return const SizedBox.shrink();
+              }
+              final videoContent = Container(
+                decoration: BoxDecoration(
+                  boxShadow: widget.shadow,
+                ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    FittedBox(
+                      fit: widget.boxFit,
+                      //aspectRatio: aspectRatio.toDouble(),
+                      child: SizedBox(
+                        width: width.toDouble(),
+                        height: height.toDouble(),
+                        child: VideoPlayerFocus(
+                          _videoPlayer.controller,
+                          widget.radius != null
+                              ? ClipRRect(
+                                  borderRadius: widget.radius!,
+                                  child: VideoPlayer(
+                                    _videoPlayer.controller,
+                                  ),
+                                )
+                              : VideoPlayer(
+                                  _videoPlayer.controller,
                                 ),
-                              ),
-                            ),
-                          ),
-                          if (widget.showProgressIndicator)
-                            VideoProgressIndicator(
-                              _videoPlayer.controller,
-                              allowScrubbing:
-                                  true, // Enable scrubbing functionality
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0, horizontal: 16.0),
-                            )
-                        ],
+                          key: ValueKey(widget.videoUrl),
+                        ),
                       ),
                     ),
-                  );
-                  return widget.longForm
-                      ? videoContent
-                      : AspectRatio(
-                          aspectRatio:
-                              aspectRatio > 1.0 ? aspectRatio.toDouble() : 1.0,
-                          child: videoContent,
-                        );
-                },
-              )
-            : const SizedBox.shrink();
+                    PointerInterceptor(
+                      child: SizedBox.expand(
+                        child: widget.contentBuilder != null
+                            ? widget.contentBuilder!(
+                                context,
+                                _videoPlayer.controller,
+                                play: _playVideo,
+                                pause: _pauseVideo,
+                                isMuted: _isMuted,
+                                mute: _mute,
+                                unMute: _unMute,
+                                isPlaying: _isPlaying,
+                                isBuffering: _isBuffering,
+                                autoPlay: widget.autoPlay,
+                              )
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+              return videoContent;
+            },
+          )
+        : const SizedBox.shrink();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 import 'package:video_preview/dots_loader.dart';
 import 'package:video_preview/video_overlay.dart';
 import '../icon_shadow.dart';
@@ -13,7 +14,8 @@ const _shadow = <Shadow>[
 ];
 
 typedef VideoContentBuilder = Widget Function(
-  BuildContext context, {
+  BuildContext context,
+  VideoPlayerController controller, {
   VoidCallback? play,
   VoidCallback? pause,
   VoidCallback? mute,
@@ -22,14 +24,11 @@ typedef VideoContentBuilder = Widget Function(
   ValueNotifier<bool>? isBuffering,
   ValueNotifier<bool>? isMuted,
   bool? autoPlay,
-  Future<void>? videoInitialized,
 });
 
 class PlayButton extends StatefulWidget {
   final VoidCallback? onPlay;
-  final Future<void>? isInitialized;
-  const PlayButton({this.onPlay, this.isInitialized, Key? key})
-      : super(key: key);
+  const PlayButton({this.onPlay, Key? key}) : super(key: key);
   @override
   State<StatefulWidget> createState() {
     return PlayButtonState();
@@ -37,21 +36,8 @@ class PlayButton extends StatefulWidget {
 }
 
 class PlayButtonState extends State<PlayButton> {
-  bool _showLoader = false;
-
   void play() async {
-    if (widget.isInitialized != null) {
-      setState(() {
-        _showLoader = true;
-      });
-      await widget.isInitialized;
-      widget.onPlay?.call();
-      setState(() {
-        _showLoader = false;
-      });
-    } else {
-      widget.onPlay?.call();
-    }
+    widget.onPlay?.call();
   }
 
   Widget _buildPlayButton() {
@@ -68,29 +54,7 @@ class PlayButtonState extends State<PlayButton> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.isInitialized != null
-        ? FutureBuilder(
-            future: widget.isInitialized,
-            builder: (BuildContext context, snapshot) {
-              Widget body;
-              if (_showLoader) {
-                body = const Center(
-                  child: DotsLoader(
-                    color: Colors.white54,
-                    size: 24.0,
-                  ),
-                );
-              } else {
-                body = _buildPlayButton();
-              }
-              return AnimatedSwitcher(
-                  duration: kThemeAnimationDuration,
-                  switchInCurve: Curves.easeIn,
-                  switchOutCurve: Curves.easeOut,
-                  child: body);
-            },
-          )
-        : _buildPlayButton();
+    return _buildPlayButton();
   }
 }
 
@@ -100,14 +64,12 @@ class VideoPlayerControls extends StatelessWidget {
   final VoidCallback? play;
   final VoidCallback? pause;
   final bool isPlaying;
-  final Future<void>? videoInitialized;
   const VideoPlayerControls(
       {this.autoPlay = true,
       this.shouldShowPlayPause = false,
       this.isPlaying = false,
       this.play,
       this.pause,
-      this.videoInitialized,
       Key? key})
       : super(key: key);
 
@@ -141,7 +103,6 @@ class VideoPlayerControls extends StatelessWidget {
       );
     } else {
       body = PlayButton(
-        isInitialized: videoInitialized,
         onPlay: () => _handlePlay(context),
       );
       body = IconButton(

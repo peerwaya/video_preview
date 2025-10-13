@@ -20,7 +20,6 @@ class VideoControls extends StatefulWidget {
   final VoidCallback? pause;
   final VoidCallback? mute;
   final VoidCallback? unMute;
-  final Future<void>? videoInitialized;
   final VoidCallback? onFullscreen;
   final String? playText;
   final String? pauseText;
@@ -37,7 +36,6 @@ class VideoControls extends StatefulWidget {
     this.isMuted,
     this.mute,
     this.unMute,
-    this.videoInitialized,
     this.onFullscreen,
     this.playText,
     this.pauseText,
@@ -58,12 +56,7 @@ class VideoControlstate extends State<VideoControls>
   VoidCallback? videoProgressListener;
 
   void _play() async {
-    if (widget.videoInitialized != null) {
-      await widget.videoInitialized;
-      widget.play?.call();
-    } else {
-      widget.play?.call();
-    }
+    widget.play?.call();
   }
 
   void _pause() {
@@ -101,30 +94,6 @@ class VideoControlstate extends State<VideoControls>
           size: 48.0,
         ),
       ),
-    );
-  }
-
-  Widget _buildPlay() {
-    return FutureBuilder(
-      future: widget.videoInitialized,
-      builder: (BuildContext context, snapshot) {
-        Widget body;
-        if (snapshot.connectionState == ConnectionState.done) {
-          body = _buildPlayButton();
-        } else {
-          body = const Center(
-            child: DotsLoader(
-              color: Colors.white54,
-              size: 24.0,
-            ),
-          );
-        }
-        return AnimatedSwitcher(
-            duration: kThemeAnimationDuration,
-            switchInCurve: Curves.easeIn,
-            switchOutCurve: Curves.easeOut,
-            child: body);
-      },
     );
   }
 
@@ -173,7 +142,7 @@ class VideoControlstate extends State<VideoControls>
                             : play,
                       );
                     },
-                    child: _buildPlay(),
+                    child: _buildPlayButton(),
                     valueListenable: widget.isPlaying!,
                   ),
                 ),
@@ -210,7 +179,7 @@ class VideoControlstate extends State<VideoControls>
                               ),
                             );
                           },
-                          child: _buildPlay(),
+                          child: _buildPlayButton(),
                           valueListenable: widget.isMuted!,
                         ),
                         if (widget.onFullscreen != null)
